@@ -1,0 +1,118 @@
+=== CAMERA MONITOR v8 - COMPLETE UPDATES ===
+Date: $(date)
+Status: APPLIED SUCCESSFULLY
+
+SUMMARY OF CHANGES
+==================
+
+1. ADDED: get_local_ip_for_target() HELPER FUNCTION
+   Location: After find_vlc_executable() (line ~87)
+   Purpose: Determines which local network interface IP would be used to reach a destination
+   Use Case: Helps bind SADP socket to correct interface for reliable device discovery
+   Example: get_local_ip_for_target("192.168.2.100") -> "192.168.1.50"
+
+2. ADDED: MODEL_ENDPOINTS DICTIONARY
+   Location: After get_local_ip_for_target() (line ~100)
+   Models Configured:
+     - DS-7732NXI-K4: 4 specific endpoints for querying remote devices and channels
+     - DS-7732NI-K4: 3 specific endpoints for querying channels
+   Purpose: Fallback API endpoints to try when SADP discovery fails
+   Benefit: Provides model-specific discovery paths for better compatibility
+
+3. ENHANCED: sadp_discover() FUNCTION SIGNATURE
+   Location: Lines ~625-750
+   New Parameters:
+     - target_subnet (optional): Specific subnet to scan (e.g., "192.168.2.0/24")
+     - preferred_local_ip (optional): Local IP to bind socket to for replies
+   Improvements:
+     - Socket binding to preferred interface (helps multi-NIC systems)
+     - Targeted subnet scanning (more efficient than broadcast alone)
+     - Better fallback logic for subnet inference
+   Backward Compatible: Old calls still work (both new params are optional)
+
+4. REWRITTEN: Method 6 (SADP) in fetch_nvr_cameras()
+   Location: Lines ~553-650
+   New Flow:
+     a) Attempt to detect NVR model via HTTP endpoints
+     b) Compute target subnet from NVR IP (/24)
+     c) Find local interface IP for reaching NVR
+     d) Call enhanced sadp_discover() with targeted subnet + interface binding
+     e) If SADP finds devices, return them
+     f) If no devices found but model is recognized, try model-specific endpoints
+     g) Parse responses for any IP addresses found in JSON/XML
+   Result: More reliable camera discovery for Hikvision devices
+   Logging: Enhanced with [6-MODEL] tags for endpoint attempts
+
+KEY IMPROVEMENTS
+================
+
+✓ Multi-Interface Support
+  - Detects which local NIC to use for reaching NVR
+  - Binds SADP socket to that interface
+  - Improves discovery on multi-NIC systems
+
+✓ Targeted Scanning
+  - Scans NVR's /24 subnet first (more relevant than random ranges)
+  - Reduces noise from unrelated network discovery
+  - Faster convergence
+
+✓ Model-Specific Fallback
+  - DS-7732NXI-K4 and DS-7732NI-K4 now have specific endpoint chains
+  - If SADP fails, tries ContentMgmt, Streaming, PSIA endpoints
+  - Extracts IPs from responses even if format differs
+
+✓ Better Error Handling & Logging
+  - New [6] and [6-MODEL] log prefixes for debugging
+  - Tracks each endpoint attempt result
+  - Helps diagnose discovery issues
+
+TESTING RECOMMENDATIONS
+=======================
+
+1. NVR Login Test:
+   - Login Dialog → enter NVR IP, user, password
+   - Verify credentials are stored and retrieved
+
+2. SADP Discovery Test:
+   - "Fetch & Update Cameras" button → watch console log
+   - Should see "[6] Trying SADP network discovery (targeted to NVR subnet)"
+   - Should see "[6] Found SADP device: ..." if cameras detected
+   - If not found, should see "[6-MODEL] Tried /ISAPI/... : 200" messages
+
+3. Multi-NIC Test (if applicable):
+   - Verify correct local interface is selected via get_local_ip_for_target()
+   - Check log shows correct binding IP
+
+4. Excel Update:
+   - Verify discovered cameras populate the ip.xlsx file
+   - Check Status, Device Type, Model columns are filled
+
+5. Check History Persistence:
+   - Close and reopen app
+   - Verify previous check results remain in table
+   - Verify check_history.json is updated
+
+KNOWN CONSIDERATIONS
+====================
+
+- Model detection is best-effort; if NVR doesn't expose model via HTTP, falls back to generic SADP
+- SADP timeout is 1.0 seconds; increase if network is slow
+- Socket binding to preferred_local_ip may fail on Windows with certain network configurations (gracefully falls back to broadcast)
+- Model endpoints are extensible; add more models to MODEL_ENDPOINTS dict as needed
+
+VERSION INFO
+============
+Internal: v8
+File: CameraMonitor_Final_v7.py
+Last Modified: $(date)
+
+CHANGELOG FROM v7 → v8
+=======================
+[NEW] get_local_ip_for_target() helper
+[NEW] MODEL_ENDPOINTS dict with 2 Hikvision models
+[ENHANCED] sadp_discover() with subnet targeting and interface binding
+[IMPROVED] fetch_nvr_cameras() Method 6 with model detection and fallback endpoints
+[FIXED] SADP discovery now more reliable for specific NVR models
+[FIXED] Multi-NIC support for socket binding
+[ADDED] Additional logging for Method 6 diagnostics
+[IMPROVED] Targeted subnet scanning improves discovery speed

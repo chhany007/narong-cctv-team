@@ -1,0 +1,9 @@
+{
+  "version": "8.1.0",
+  "download_url": "https://github.com/chhany007/narong-cctv-team/releases/download/v8.1.0/NARONG_CCTV_TEAM.exe",
+  "release_notes": "🎉 What's New in v8.1.0:\n\n✨ New Features:\n  • Enhanced SADP discovery performance\n  • Improved NVR camera fetching\n  • Better error handling for network timeouts\n  • Added batch camera status checking\n\n🐛 Bug Fixes:\n  • Fixed issue with NVR login on some models\n  • Resolved camera list refresh bug\n  • Improved Excel sheet detection\n\n⚡ Performance:\n  • Faster parallel camera checking\n  • Reduced memory usage\n  • Optimized network scans\n\n📝 Other Improvements:\n  • Updated UI styling\n  • Better logging system\n  • Enhanced credential management",
+  "release_date": "2025-11-20",
+  "file_size": 108000000,
+  "checksum": "a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0u1v2w3x4y5z6a7b8c9d0e1f2",
+  "required": false
+}

@@ -1,0 +1,198 @@
+=== CAMERA MONITOR v8 - WORKFLOW & LOGO UPDATES ===
+Completed: November 15, 2025
+
+MAJOR FEATURES ADDED
+====================
+
+1. SKY-TECH LOGO INTEGRATION
+   ✓ Logo file reference: "sky-tech logo.png"
+   ✓ Window icon: App title bar displays Sky-Tech logo
+   ✓ Toolbar logo: 32px logo displayed in main toolbar
+   ✓ Dialog logos: All dialog windows display logo in header
+   ✓ Workflow wizard: Logo featured prominently in workflow dialog
+
+2. QUICK WORKFLOW BUTTON (🚀)
+   Location: Main toolbar (red button for visibility)
+   Purpose: Automated step-by-step camera discovery
+   Styling: Red (#e74c3c) background, white text, bold
+
+3. AUTOMATED WORKFLOW WIZARD
+   Dialog: Beautiful, professional design with:
+   - Sky-Tech logo at top
+   - Clear step-by-step instructions
+   - Progress tracking label
+   - Color-coded steps
+   - Start/Cancel buttons
+
+WORKFLOW STEPS (Automated in Sequence)
+=====================================
+
+Step 1: 🟢 NVR Login & Fetch Credentials
+   - Open NVR Login dialog
+   - User selects NVR and enters credentials
+   - Verifies connectivity
+
+Step 2: 🔵 Fetch & Update Cameras from NVR
+   - Automatically discover cameras on selected NVR
+   - Retrieves IP, model, device type
+   - Populates camera table
+
+Step 3: 🟣 Check IP Online Status
+   - Parallel scan with 60 workers
+   - Updates Status column (online/offline)
+   - Very fast (uses ThreadPoolExecutor)
+
+Step 4: 🟠 SADP Network Scan (Optional)
+   - Discover additional cameras on network
+   - Find devices not registered on NVR
+   - Build comprehensive device registry
+
+Step 5: 🔴 Export & Save Results
+   - Save cameras to Excel (ip.xlsx)
+   - Export registry to CSV (sadp_devices_export.csv)
+   - Create audit trail
+
+COLOR CODING
+============
+✓ Step 1: Green (#27ae60) - NVR Login
+✓ Step 2: Blue (#3498db) - Fetch Cameras
+✓ Step 3: Purple (#9b59b6) - Check Status
+✓ Step 4: Orange (#f39c12) - SADP Scan
+✓ Step 5: Red (#e74c3c) - Export
+
+LOGO PLACEMENT
+==============
+✓ Main Window
+  - Title bar icon (32x32)
+  - Toolbar display (32px height)
+
+✓ NVR Login Dialog
+  - Window icon
+  - Header logo
+
+✓ SADP Tool Dialog
+  - Window icon
+  - Header logo
+
+✓ Workflow Wizard Dialog
+  - Window icon
+  - Large logo in header (48px)
+  - Professional layout
+
+✓ All Other Dialogs
+  - Window icons throughout
+
+WORKFLOW FEATURES
+=================
+
+Visual Progress Tracking:
+- Real-time status updates
+- Color-changing progress bar
+- Step counter (1/5, 2/5, etc.)
+- Clear instructions for each step
+
+Automated Actions:
+- NVR Login dialog auto-opens
+- Cameras fetched automatically
+- IP checks run in parallel
+- SADP scan opens automatically
+- Results exported to files
+
+Error Handling:
+- Checks if NVR data loaded
+- Validates each step completion
+- Shows helpful error messages
+- Can restart workflow
+
+USER INTERFACE IMPROVEMENTS
+============================
+
+Main Toolbar:
+- Logo on left side
+- "Quick Workflow" button (red, prominent)
+- All existing buttons preserved
+
+Window Title:
+- Changed from: "KKCCTV Team - Final v8"
+- Changed to: "🔐 KKCCTV Team - Camera Monitor v8"
+- Added lock icon for security context
+
+Professional Appearance:
+- Consistent branding throughout
+- Logo visible in all key areas
+- Color-coded workflow steps
+- Clear visual hierarchy
+
+TECHNICAL IMPLEMENTATION
+=========================
+
+New Constants:
+- LOGO_FILE = "sky-tech logo.png"
+
+New Methods:
+- show_workflow_wizard(): Main workflow dialog
+- _workflow_step2(): Fetch cameras
+- _workflow_step3(): Check IP online
+- _workflow_step4(): SADP scan
+- _workflow_step5(): Export results
+- _workflow_complete(): Final status
+
+New Button:
+- self.btn_workflow: Red button in toolbar
+- Triggers show_workflow_wizard()
+
+Logo Handling:
+- Checks file existence before loading
+- Graceful fallback if logo missing
+- Scalable: uses scaledToHeight() for proper sizing
+
+USAGE INSTRUCTIONS
+==================
+
+Basic Workflow (One Click):
+1. Load Excel file (📂 Load Excel)
+2. Click "🚀 Quick Workflow" button
+3. Follow dialog steps
+4. All cameras discovered automatically
+
+Advanced Options Still Available:
+- Manual NVR Login (🔐 NVR Login button)
+- Manual SADP Scan (🔧 SADP Tool button)
+- Manual checks (☑ Check IP Online)
+- Individual camera checks
+
+BENEFITS
+========
+✓ Faster camera discovery (one workflow)
+✓ Professional branding (Sky-Tech logo)
+✓ Guided experience (step-by-step)
+✓ Reduced user confusion
+✓ Complete automation
+✓ Better organization
+
+FILE REFERENCES
+===============
+Logo File: sky-tech logo.png (32x32 to 48px scaled)
+Output Files: ip.xlsx, sadp_devices_export.csv, check_history.json
+
+COMPATIBILITY
+=============
+✓ Works with all existing features
+✓ Doesn't break manual workflows
+✓ All previous buttons still functional
+✓ Backward compatible
+
+VERSION BUMP
+============
+File: CameraMonitor_Final_v7.py
+Version: v8 (with Workflow + Logo)
+Title: "🔐 KKCCTV Team - Camera Monitor v8"
+Status: Ready for production
+
+NEXT STEPS (Optional Enhancements)
+==================================
+- Add workflow scheduling
+- Email workflow results
+- Scheduled automatic discovery
+- Workflow history logging
+- Custom workflow templates

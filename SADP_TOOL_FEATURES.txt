@@ -1,0 +1,126 @@
+=== SADP TOOL - ADVANCED DEVICE MANAGER ===
+Implemented: November 15, 2025
+
+OVERVIEW
+========
+Renamed "SADP Discover" button to "SADP Tool (🔧)" and added comprehensive device management features.
+
+FEATURES IMPLEMENTED
+====================
+
+1. 🔍 DISCOVERY TAB
+   - Custom subnet targeting (e.g., 192.168.1.0/24)
+   - Adjustable scan timeout (0.5 - 10 seconds)
+   - Real-time progress bar during scanning
+   - Results table: IP, Model, Serial, MAC, Device Name, Status
+   - Auto-registers found devices to persistent registry
+
+2. 📋 DEVICE REGISTRY TAB
+   - Persistent storage of all discovered devices (sadp_registry.json)
+   - Tracks per device:
+     * IP address
+     * Model
+     * Serial number
+     * MAC address
+     * First seen timestamp
+     * Last seen timestamp
+     * Notes field (for custom annotations)
+   - Clear Registry button to reset history
+   - View all previously discovered devices
+
+3. ⚙ BATCH OPERATIONS TAB
+   - Multi-select checkbox for each device
+   - Select All / Deselect All buttons
+   - Bulk import to Excel: import multiple devices at once
+   - Bulk open in browser: open selected devices' web interfaces
+   - Quick device management and configuration
+
+4. 📡 REAL-TIME MONITOR TAB
+   - Continuous background monitoring of registered devices
+   - Configurable check interval (1-60 seconds)
+   - Tracks online/offline status per device
+   - Offline counter: counts consecutive missed check-ins
+   - Last check timestamp
+   - Start/Stop monitoring controls
+   - Useful for checking device availability over time
+
+5. 💾 EXPORT FUNCTION
+   - Export all devices to CSV (sadp_devices_export.csv)
+   - Includes all tracked metadata
+   - For external reporting or analysis
+
+DATA PERSISTENCE
+================
+- sadp_registry.json: stores all discovered devices and history
+- Auto-loaded on SADP Tool open
+- Auto-saved after each scan
+- Auto-saved during monitoring
+
+WORKFLOW EXAMPLES
+=================
+
+Example 1: Quick Discovery
+1. Click "SADP Tool" button
+2. Leave subnet blank (auto-detect) or enter specific subnet
+3. Click "Start Scan"
+4. View results in Discovery tab
+5. Devices are automatically added to Registry
+
+Example 2: Batch Configuration
+1. Perform a scan in Discovery tab
+2. Go to Batch Operations tab
+3. Click "Select All" to select all discovered devices
+4. Click "Open in Browser" to configure each device
+5. Or "Import to Excel" to add them to your inventory
+
+Example 3: Monitor Network Health
+1. Go to Monitor tab
+2. Set check interval (e.g., 5 seconds)
+3. Click "Start Monitoring"
+4. Monitor shows real-time online/offline status
+5. Offline counter tracks device availability
+6. View trends and device reliability
+
+Example 4: Historical Analysis
+1. Devices are tracked in Registry (persistent)
+2. Can see "First Seen" and "Last Seen" timestamps
+3. Export to CSV for trend analysis
+4. Add notes to devices for documentation
+
+KEY IMPROVEMENTS OVER PREVIOUS VERSION
+======================================
+✓ Persistent device history (registry)
+✓ Multi-select batch operations
+✓ Real-time monitoring capability
+✓ Device registry with timestamps
+✓ CSV export for reporting
+✓ Cleaner tabbed interface
+✓ Subnet customization
+✓ Timeout control
+✓ Better progress feedback
+
+BUTTON CHANGES
+==============
+Old: "🔎 SADP Discover" → Simple one-time discovery
+New: "🔧 SADP Tool" → Full-featured device manager with 5 tabs
+
+FILES CREATED
+=============
+- sadp_registry.json: Device registry (auto-created on first use)
+- sadp_devices_export.csv: Generated on export (optional)
+
+TECHNICAL NOTES
+===============
+- All network operations run in background threads (non-blocking UI)
+- Registry is JSON-based, human-readable
+- Monitor runs continuously until stopped
+- All timestamps are in YYYY-MM-DD HH:MM:SS format
+- Checkboxes in batch operations for easy multi-select
+- Progress callbacks show real-time scan progress
+
+VERSION INFO
+============
+File: CameraMonitor_Final_v7.py
+Version: v8 (with SADP Tool enhancement)
+Rename: show_sadp_dialog() → show_sadp_tool()
+Helper functions: _load_sadp_registry(), _save_sadp_registry(), _update_monitor_table()

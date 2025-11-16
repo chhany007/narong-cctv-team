@@ -1,0 +1,76 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+.venv/
+ENV/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# PyInstaller
+*.manifest
+*.spec
+build/
+dist/
+
+# Logs
+*.log
+camera_monitor.log
+
+# Local data files
+check_history.json
+creds_store.json
+creds_meta.json
+last_update_check.json
+update_cache.json
+sadp_registry.json
+
+# Exported files
+exported_cameras.csv
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Temporary files
+temp_*
+_patch_tmp.py
+
+# Excel backup files
+~$*.xlsx
+*.tmp
+
+# Credentials (never commit!)
+creds_*.json
+*_credentials.json
+
+# Local configuration (keep template, ignore local modifications)
+# version_config.json  # Uncomment if you want to ignore local version config
+
+# Test files
+test_*.json
