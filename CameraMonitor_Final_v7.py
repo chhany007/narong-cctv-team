@@ -367,21 +367,123 @@ def test_nvr_login(ip: str, username: str, password: str, timeout: float = 2.0) 
         log(f"=== UNEXPECTED ERROR: {msg} ===")
         return False, "", msg
 
-def fetch_nvr_cameras(nvr_ip: str, username: str, password: str, timeout: float = 2.0) -> tuple:
+def fetch_nvr_cameras(nvr_ip: str, username: str, password: str, timeout: float = 3.0) -> tuple:
     """Fetch list of cameras from NVR. Returns (success: bool, cameras: list, total_count: int, active_count: int, error_msg: str)
     
-    cameras list format: [{"name": "Camera 1", "ip": "192.168.1.10", "status": "online"}, ...]
+    cameras list format: [{"name": "Camera 1", "ip": "192.168.1.10", "status": "online", "channel": 1, "port": 554}, ...]
     """
     log(f"=== Fetching NVR Cameras ===")
-    log(f"NVR IP: {nvr_ip}, Timeout: {timeout}s")
+    log(f"NVR IP: {nvr_ip}, User: {username}, Timeout: {timeout}s")
     
     cameras = []
     total_count = 0
     active_count = 0
     
     try:
-        # Method 1: Try v1 API (GET device list with status)
-        log(f"[1] Trying v1 API: /api/v1/devices")
+        # Method 1: Try Hikvision ISAPI - Most common
+        log(f"[1] Trying Hikvision ISAPI: /ISAPI/ContentMgmt/InputProxy/channels")
+        url = f"http://{nvr_ip}/ISAPI/ContentMgmt/InputProxy/channels"
+        try:
+            resp = requests.get(url, auth=HTTPBasicAuth(username, password), timeout=timeout)
+            log(f"[1] Response status: {resp.status_code}")
+            if resp.status_code == 200:
+                try:
+                    root = ET.fromstring(resp.content)
+                    for chan in root.findall('.//InputProxyChannel'):
+                        chan_id = chan.findtext('id', '')
+                        chan_name = chan.findtext('name', f'Camera {chan_id}')
+                        chan_enabled = chan.findtext('enabled', 'false').lower() == 'true'
+                        
+                        # Try to get IP from sourceInputPortDescriptor
+                        ip_addr = ""
+                        port = 554
+                        src_desc = chan.find('.//sourceInputPortDescriptor')
+                        if src_desc is not None:
+                            ip_addr = src_desc.findtext('ipAddress', '')
+                            port_text = src_desc.findtext('managePortNo', '554')
+                            try:
+                                port = int(port_text)
+                            except:
+                                port = 554
+                        
+                        if ip_addr and chan_enabled:
+                            status = "online" if chan_enabled else "offline"
+                            cameras.append({
+                                "name": chan_name,
+                                "ip": ip_addr,
+                                "status": status,
+                                "channel": chan_id,
+                                "port": port
+                            })
+                            total_count += 1
+                            if chan_enabled:
+                                active_count += 1
+                            log(f"[1] Found camera: {chan_name} ({ip_addr}:{port}) - Channel {chan_id} - {status}")
+                    
+                    if cameras:
+                        log(f"[1] SUCCESS - Hikvision ISAPI: {total_count} cameras, {active_count} active")
+                        return True, cameras, total_count, active_count, ""
+                except ET.ParseError as e:
+                    log(f"[1] XML Parse error: {e}")
+        except requests.exceptions.Timeout:
+            log(f"[1] TIMEOUT")
+        except Exception as e:
+            log(f"[1] ERROR: {e}")
+        
+        # Method 2: Try Dahua API
+        log(f"[2] Trying Dahua API: /cgi-bin/configManager.cgi?action=getConfig&name=ChannelTitle")
+        url = f"http://{nvr_ip}/cgi-bin/configManager.cgi?action=getConfig&name=ChannelTitle"
+        try:
+            resp = requests.get(url, auth=HTTPBasicAuth(username, password), timeout=timeout)
+            log(f"[2] Response status: {resp.status_code}")
+            if resp.status_code == 200:
+                # Parse Dahua config format: table.ChannelTitle[0].Name=Camera1
+                lines = resp.text.split('\n')
+                channel_names = {}
+                for line in lines:
+                    if 'ChannelTitle[' in line and '.Name=' in line:
+                        try:
+                            # Extract: table.ChannelTitle[0].Name=Camera1
+                            chan_num = line.split('[')[1].split(']')[0]
+                            name = line.split('=', 1)[1].strip()
+                            channel_names[chan_num] = name
+                        except:
+                            pass
+                
+                if channel_names:
+                    # Now get channel IPs
+                    url2 = f"http://{nvr_ip}/cgi-bin/configManager.cgi?action=getConfig&name=RemoteDevice"
+                    resp2 = requests.get(url2, auth=HTTPBasicAuth(username, password), timeout=timeout)
+                    if resp2.status_code == 200:
+                        for line in resp2.text.split('\n'):
+                            if 'RemoteDevice[' in line and '.Address=' in line:
+                                try:
+                                    chan_num = line.split('[')[1].split(']')[0]
+                                    ip_addr = line.split('=', 1)[1].strip()
+                                    name = channel_names.get(chan_num, f'Camera {chan_num}')
+                                    cameras.append({
+                                        "name": name,
+                                        "ip": ip_addr,
+                                        "status": "online",
+                                        "channel": chan_num,
+                                        "port": 554
+                                    })
+                                    total_count += 1
+                                    active_count += 1
+                                    log(f"[2] Found camera: {name} ({ip_addr}) - Channel {chan_num}")
+                                except:
+                                    pass
+                
+                if cameras:
+                    log(f"[2] SUCCESS - Dahua API: {total_count} cameras")
+                    return True, cameras, total_count, active_count, ""
+        except requests.exceptions.Timeout:
+            log(f"[2] TIMEOUT")
+        except Exception as e:
+            log(f"[2] ERROR: {e}")
+        
+        # Method 3: Try v1 API (GET device list with status)
+        log(f"[3] Trying generic v1 API: /api/v1/devices")
         url = f"http://{nvr_ip}/api/v1/devices"
         try:
             resp = requests.get(url, auth=HTTPBasicAuth(username, password), timeout=timeout)
@@ -1022,7 +1124,13 @@ class CameraMonitor(QtWidgets.QMainWindow):
         # Set window icon if logo exists
         logo_path = self.get_resource_path(LOGO_FILE)
         if os.path.exists(logo_path):
-            self.setWindowIcon(QtGui.QIcon(logo_path))
+            app_icon = QtGui.QIcon(logo_path)
+            self.setWindowIcon(app_icon)
+            # Also set application-wide icon for taskbar
+            QtWidgets.QApplication.setWindowIcon(app_icon)
+            log("Window and taskbar icon loaded successfully")
+        else:
+            log(f"Logo file not found: {logo_path}")
 
         self.setStyleSheet("""
             QWidget{font-family:Arial; font-size:12px;}

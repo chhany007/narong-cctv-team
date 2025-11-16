@@ -1,12 +1,12 @@
 {
-  "version": "8.1.0",
-  "download_url": "https://github.com/chhany007/narong-cctv-team/releases/download/v8.1.0/NARONG_CCTV_TEAM.exe",
-  "installer_url": "https://github.com/chhany007/narong-cctv-team/releases/download/v8.1.0/NARONG_CCTV_Team_Setup_v8.1.0.exe",
-  "release_notes": "🎉 What's New in v8.1.0:\n\n✨ New Features:\n  • Professional Windows Installer support\n  • Enhanced update system (portable + installed modes)\n  • Automatic data preservation during updates\n  • Start Menu shortcuts and desktop icons\n  • Enhanced SADP discovery performance\n  • Improved NVR camera fetching\n  • Better error handling for network timeouts\n  • Added batch camera status checking\n\n🐛 Bug Fixes:\n  • Fixed issue with NVR login on some models\n  • Resolved camera list refresh bug\n  • Improved Excel sheet detection\n\n⚡ Performance:\n  • Faster parallel camera checking\n  • Reduced memory usage\n  • Optimized network scans\n\n📝 Other Improvements:\n  • Updated UI styling\n  • Better logging system\n  • Enhanced credential management\n  • Professional installation experience\n\n📦 Installation Options:\n  • Portable: Just run the EXE\n  • Installer: Professional Windows setup with Start Menu integration",
+  "version": "8.2.0",
+  "download_url": "https://github.com/chhany007/narong-cctv-team/releases/download/v8.2.0/NARONG_CCTV_TEAM.exe",
+  "installer_url": "https://github.com/chhany007/narong-cctv-team/releases/download/v8.2.0/NARONG_CCTV_Team_Setup_v8.2.0.exe",
+  "release_notes": "🎉 What's New in v8.2.0:\n\n✨ NEW FEATURES:\n  • Enhanced NVR Camera Extraction\n    - Added Hikvision ISAPI support (most reliable method)\n    - Added Dahua API support for Dahua NVRs\n    - Improved channel detection with IP and port info\n    - Better status detection (online/offline)\n    - More detailed logging for troubleshooting\n\n  • Taskbar Icon\n    - Application logo now appears in Windows taskbar\n    - Better branding and easier identification\n\n🐛 BUG FIXES:\n  • Fixed update system crash on startup\n  • Fixed resource path issues in bundled EXE\n  • Improved NVR timeout handling\n\n⚡ PERFORMANCE:\n  • Increased NVR fetch timeout from 2s to 3s\n  • Better error handling for network issues\n  • More efficient camera discovery\n\n📝 OTHER IMPROVEMENTS:\n  • Enhanced logging for NVR operations\n  • Better XML parsing for Hikvision devices\n  • Improved Dahua config parsing\n  • Cleaner codebase",
   "release_date": "2025-11-16",
-  "file_size": 108042621,
+  "file_size": 108046595,
   "installer_size": 0,
-  "checksum": "060E0996166171ACE54EF2A6AE79DBAB85F0C95AAE0B4626C5A03ABF7F6BF478",
+  "checksum": "2AE83F97018DCB90D8B20E27185551C6FFDDAD9D65D2F3D547897B7EB3E1103A",
   "installer_checksum": "",
   "required": false,
   "portable": true

@@ -13,7 +13,17 @@ import hashlib
 from datetime import datetime
 from PyQt5 import QtCore, QtWidgets, QtGui
 
-VERSION_CONFIG_FILE = "version_config.json"
+# Get the correct path for bundled files
+def get_resource_path(relative_path):
+    """Get absolute path to resource, works for dev and for PyInstaller"""
+    try:
+        # PyInstaller creates a temp folder and stores path in _MEIPASS
+        base_path = sys._MEIPASS
+    except Exception:
+        base_path = os.path.abspath(".")
+    return os.path.join(base_path, relative_path)
+
+VERSION_CONFIG_FILE = get_resource_path("version_config.json")
 UPDATE_CACHE_FILE = "update_cache.json"
 LAST_CHECK_FILE = "last_update_check.json"
 
