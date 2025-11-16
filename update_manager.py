@@ -382,6 +382,19 @@ class DownloadThread(QtCore.QThread):
             self.finished_signal.emit(False, "", error)
 
 
+class CheckThread(QtCore.QThread):
+    """Background thread for checking updates"""
+    result = QtCore.pyqtSignal(object, str)
+    
+    def __init__(self, checker):
+        super().__init__()
+        self.checker = checker
+    
+    def run(self):
+        update_info, error = self.checker.check_for_updates()
+        self.result.emit(update_info, error)
+
+
 def check_for_updates_async(parent_widget=None, show_no_update=False):
     """Check for updates asynchronously and show dialog if available"""
     checker = UpdateChecker()
@@ -402,18 +415,6 @@ def check_for_updates_async(parent_widget=None, show_no_update=False):
     progress.setMinimumDuration(0)
     progress.setCancelButton(None)
     progress.show()
-    
-    # Check in background
-    class CheckThread(QtCore.QThread):
-        result = QtCore.pyqtSignal(object, str)
-        
-        def __init__(self, checker):
-            super().__init__()
-            self.checker = checker
-        
-        def run(self):
-            update_info, error = self.checker.check_for_updates()
-            self.result.emit(update_info, error)
     
     def on_check_complete(update_info, error):
         progress.close()
@@ -445,4 +446,10 @@ def check_for_updates_async(parent_widget=None, show_no_update=False):
     
     check_thread = CheckThread(checker)
     check_thread.result.connect(on_check_complete)
+    check_thread.finished.connect(check_thread.deleteLater)  # Clean up when done
     check_thread.start()
+    
+    # Keep reference to prevent garbage collection
+    if not hasattr(parent_widget, '_update_threads'):
+        parent_widget._update_threads = []
+    parent_widget._update_threads.append(check_thread)

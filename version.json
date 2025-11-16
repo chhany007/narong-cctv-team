@@ -3,11 +3,11 @@
   "download_url": "https://github.com/chhany007/narong-cctv-team/releases/download/v8.1.0/NARONG_CCTV_TEAM.exe",
   "installer_url": "https://github.com/chhany007/narong-cctv-team/releases/download/v8.1.0/NARONG_CCTV_Team_Setup_v8.1.0.exe",
   "release_notes": "🎉 What's New in v8.1.0:\n\n✨ New Features:\n  • Professional Windows Installer support\n  • Enhanced update system (portable + installed modes)\n  • Automatic data preservation during updates\n  • Start Menu shortcuts and desktop icons\n  • Enhanced SADP discovery performance\n  • Improved NVR camera fetching\n  • Better error handling for network timeouts\n  • Added batch camera status checking\n\n🐛 Bug Fixes:\n  • Fixed issue with NVR login on some models\n  • Resolved camera list refresh bug\n  • Improved Excel sheet detection\n\n⚡ Performance:\n  • Faster parallel camera checking\n  • Reduced memory usage\n  • Optimized network scans\n\n📝 Other Improvements:\n  • Updated UI styling\n  • Better logging system\n  • Enhanced credential management\n  • Professional installation experience\n\n📦 Installation Options:\n  • Portable: Just run the EXE\n  • Installer: Professional Windows setup with Start Menu integration",
-  "release_date": "2025-11-20",
-  "file_size": 110000000,
-  "installer_size": 115000000,
-  "checksum": "PORTABLE_EXE_SHA256_HASH_HERE",
-  "installer_checksum": "INSTALLER_EXE_SHA256_HASH_HERE",
+  "release_date": "2025-11-16",
+  "file_size": 108042621,
+  "installer_size": 0,
+  "checksum": "060E0996166171ACE54EF2A6AE79DBAB85F0C95AAE0B4626C5A03ABF7F6BF478",
+  "installer_checksum": "",
   "required": false,
   "portable": true
 }
