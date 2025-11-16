@@ -1,12 +1,12 @@
 {
-  "version": "8.3.0",
-  "download_url": "https://github.com/chhany007/narong-cctv-team/releases/download/v8.3.0/NARONG_CCTV_TEAM.exe",
-  "installer_url": "https://github.com/chhany007/narong-cctv-team/releases/download/v8.3.0/NARONG_CCTV_Team_Setup_v8.3.0.exe",
-  "release_notes": "🎉 What's New in v8.3.0:\n\n✨ NEW FEATURES:\n  • Automatic Update Installation\n    - No more manual file replacement\n    - App closes, updates, and restarts automatically\n    - Safe backup and rollback on failure\n\n  • Improved User Interface\n    - Renamed 'Check for Updates' to 'Update' (shorter)\n    - Moved Update button to end of toolbar (next to search)\n    - Renamed 'Quick Workflow' to 'Quick Sync' (clearer)\n\n  • Fixed NVR Switching Bug\n    - Check operations now cancel when switching NVRs\n    - No more row misalignment issues\n    - Separate checking for each NVR\n\n🐛 BUG FIXES:\n  • Fixed camera check continuing on wrong NVR after switch\n  • Fixed row index mismatch during parallel checks\n  • Improved check cancellation logic\n\n⚡ PERFORMANCE:\n  • Better thread management for checks\n  • Cleaner operation cancellation\n  • Reduced UI blocking during updates\n\n📝 OTHER IMPROVEMENTS:\n  • Added updater.py for automatic file replacement\n  • Better error handling in update process\n  • Cleaner toolbar layout\n  • Enhanced logging for troubleshooting",
+  "version": "8.4.0",
+  "download_url": "https://github.com/chhany007/narong-cctv-team/releases/download/v8.4.0/NARONG_CCTV_TEAM.exe",
+  "installer_url": "https://github.com/chhany007/narong-cctv-team/releases/download/v8.4.0/NARONG_CCTV_Team_Setup_v8.4.0.exe",
+  "release_notes": "🎉 What's New in v8.4.0:\n\n✨ NEW FEATURES:\n  • Fixed Auto-Update System\n    - Updates now replace file in current folder (not temp)\n    - Old file automatically deleted after successful update\n    - New version replaces old version in-place\n\n  • Auto-Load Excel File\n    - ip.xlsx automatically loads on startup\n    - No need to manually click 'Load Excel'\n    - Faster workflow on app launch\n\n  • Status Bar Counters\n    - Real-time Total cameras count\n    - 🟢 Online cameras counter (green)\n    - 🔴 Offline cameras counter (red)\n    - Always visible in bottom right\n\n  • UI Improvements\n    - Renamed 'Update' button to 'Updates'\n    - Better button labeling\n\n🐛 BUG FIXES:\n  • Fixed updater not replacing file in original location\n  • Fixed old version not being deleted after update\n  • Fixed Excel not loading automatically\n  • Fixed status counters not updating after checks\n\n⚡ PERFORMANCE:\n  • Better update file handling\n  • Cleaner in-place file replacement\n  • Faster startup with auto-load\n\n📝 OTHER IMPROVEMENTS:\n  • Enhanced updater.py logic\n  • Better error handling during updates\n  • Improved user feedback with counters",
   "release_date": "2025-11-16",
-  "file_size": 108047415,
+  "file_size": 110000000,
   "installer_size": 0,
-  "checksum": "9D311B6AB8F165FE62ED2B5A452BF7D483C8EEA79E37A3C9E6271956FE9665A0",
+  "checksum": "PLACEHOLDER_CHECKSUM",
   "installer_checksum": "",
   "required": false,
   "portable": true

@@ -203,13 +203,36 @@ class UpdateChecker:
             return False
     
     def install_update(self, installer_path):
-        """Launch installer and exit current application"""
+        """Launch updater to replace current EXE and restart"""
         try:
-            # Launch installer with elevated privileges
-            subprocess.Popen([installer_path], shell=True)
+            # Get current executable path
+            if getattr(sys, 'frozen', False):
+                current_exe = sys.executable
+            else:
+                current_exe = os.path.abspath(sys.argv[0])
+            
+            # Get updater script path
+            updater_script = self.get_resource_path('updater.py')
+            
+            if not os.path.exists(updater_script):
+                return False, "Updater script not found"
+            
+            # Launch updater with both paths
+            if getattr(sys, 'frozen', False):
+                # Running as EXE - use bundled Python to run updater
+                subprocess.Popen(
+                    [sys.executable, updater_script, current_exe, installer_path],
+                    creationflags=subprocess.CREATE_NO_WINDOW if sys.platform == 'win32' else 0
+                )
+            else:
+                # Running as script
+                subprocess.Popen(
+                    [sys.executable, updater_script, current_exe, installer_path]
+                )
+            
             return True, None
         except Exception as e:
-            return False, f"Failed to launch installer: {str(e)}"
+            return False, f"Failed to launch updater: {str(e)}"
 
 
 class UpdateDialog(QtWidgets.QDialog):

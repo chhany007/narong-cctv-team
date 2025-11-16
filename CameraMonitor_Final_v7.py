@@ -1180,7 +1180,7 @@ class CameraMonitor(QtWidgets.QMainWindow):
         top.addStretch()
         # Add update button at the end
         if UPDATE_MANAGER_AVAILABLE:
-            self.btn_update = QtWidgets.QPushButton("🔄 Update")
+            self.btn_update = QtWidgets.QPushButton("🔄 Updates")
             self.btn_update.clicked.connect(self.check_for_updates_manual)
             top.addWidget(self.btn_update)
         top.addWidget(self.search)
@@ -1248,16 +1248,30 @@ class CameraMonitor(QtWidgets.QMainWindow):
 
         # status bar + signals
         self.status = QtWidgets.QStatusBar(); self.setStatusBar(self.status)
+        # Add permanent counters to status bar
+        self.lbl_total = QtWidgets.QLabel("Total: 0")
+        self.lbl_online = QtWidgets.QLabel("🟢 Online: 0")
+        self.lbl_online.setStyleSheet("color: green; font-weight: bold;")
+        self.lbl_offline = QtWidgets.QLabel("🔴 Offline: 0")
+        self.lbl_offline.setStyleSheet("color: red; font-weight: bold;")
+        self.status.addPermanentWidget(self.lbl_total)
+        self.status.addPermanentWidget(QtWidgets.QLabel(" | "))
+        self.status.addPermanentWidget(self.lbl_online)
+        self.status.addPermanentWidget(QtWidgets.QLabel(" | "))
+        self.status.addPermanentWidget(self.lbl_offline)
+        
         self.table_update.connect(self.apply_table_update)
         self.nvr_update.connect(self.apply_nvr_update)
         self.nvr_login_result.connect(self.on_nvr_login_result)
 
-        # initial load
-        if os.path.exists(EXCEL_FILE):
+        # Auto-load Excel on startup
+        excel_path = self.get_resource_path(EXCEL_FILE)
+        if os.path.exists(excel_path):
             try:
                 self.load_data(initial=True)
+                log(f"Auto-loaded Excel file: {excel_path}")
             except Exception as e:
-                log(traceback.format_exc())
+                log(f"Failed to auto-load Excel: {traceback.format_exc()}")
         # load check history if present
         try:
             if os.path.exists(CHECK_HISTORY_FILE):
@@ -1337,6 +1351,31 @@ class CameraMonitor(QtWidgets.QMainWindow):
             nvt = QtWidgets.QTableWidgetItem(nvr_idx_text if nvr_idx_text else "—")
             nvt.setForeground(QtGui.QColor("black"))
             self.table.setItem(r, 5, nvt)
+        
+        # Update status bar counters
+        self.update_counters()
+        
+        # Update status bar counters
+        self.update_counters()
+    
+    def update_counters(self):
+        """Update status bar counters for total/online/offline cameras"""
+        total = self.table.rowCount()
+        online = 0
+        offline = 0
+        
+        for r in range(total):
+            status_item = self.table.item(r, 3)
+            if status_item:
+                status_txt = status_item.text().lower()
+                if 'online' in status_txt or '🟢' in status_txt:
+                    online += 1
+                elif 'offline' in status_txt or '🔴' in status_txt:
+                    offline += 1
+        
+        self.lbl_total.setText(f"Total: {total}")
+        self.lbl_online.setText(f"🟢 Online: {online}")
+        self.lbl_offline.setText(f"🔴 Offline: {offline}")
 
     # ---------------- NVR select/filter ----------------
     def on_nvr_selected(self):
@@ -1704,6 +1743,9 @@ class CameraMonitor(QtWidgets.QMainWindow):
                 pass
         except Exception:
             pass
+        
+        # Update status bar counters
+        self.update_counters()
 
     # ---------------- NVR refresh ----------------
     def refresh_nvr_status(self):
