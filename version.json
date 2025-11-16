@@ -4,9 +4,9 @@
   "installer_url": "https://github.com/chhany007/narong-cctv-team/releases/download/v8.4.0/NARONG_CCTV_Team_Setup_v8.4.0.exe",
   "release_notes": "🎉 What's New in v8.4.0:\n\n✨ NEW FEATURES:\n  • Fixed Auto-Update System\n    - Updates now replace file in current folder (not temp)\n    - Old file automatically deleted after successful update\n    - New version replaces old version in-place\n\n  • Auto-Load Excel File\n    - ip.xlsx automatically loads on startup\n    - No need to manually click 'Load Excel'\n    - Faster workflow on app launch\n\n  • Status Bar Counters\n    - Real-time Total cameras count\n    - 🟢 Online cameras counter (green)\n    - 🔴 Offline cameras counter (red)\n    - Always visible in bottom right\n\n  • UI Improvements\n    - Renamed 'Update' button to 'Updates'\n    - Better button labeling\n\n🐛 BUG FIXES:\n  • Fixed updater not replacing file in original location\n  • Fixed old version not being deleted after update\n  • Fixed Excel not loading automatically\n  • Fixed status counters not updating after checks\n\n⚡ PERFORMANCE:\n  • Better update file handling\n  • Cleaner in-place file replacement\n  • Faster startup with auto-load\n\n📝 OTHER IMPROVEMENTS:\n  • Enhanced updater.py logic\n  • Better error handling during updates\n  • Improved user feedback with counters",
   "release_date": "2025-11-16",
-  "file_size": 110000000,
+  "file_size": 108048687,
   "installer_size": 0,
-  "checksum": "PLACEHOLDER_CHECKSUM",
+  "checksum": "1671B0F4E5705E6CFA7822F61146669295F6397E24FA1E16E08630DE087E6F0A",
   "installer_checksum": "",
   "required": false,
   "portable": true
