@@ -40,6 +40,14 @@ class UpdateInfo:
 class UpdateChecker:
     def __init__(self):
         self.config = self.load_config()
+    
+    def get_resource_path(self, relative_path):
+        """Get absolute path to resource, works for dev and for PyInstaller"""
+        try:
+            base_path = sys._MEIPASS
+        except Exception:
+            base_path = os.path.abspath(".")
+        return os.path.join(base_path, relative_path)
         
     def load_config(self):
         """Load version configuration"""
@@ -334,22 +342,43 @@ class UpdateDialog(QtWidgets.QDialog):
             self.later_btn.setEnabled(True)
     
     def install_update(self):
-        """Install the downloaded update"""
+        """Install the downloaded update with automatic replacement"""
         if self.installer_path and os.path.exists(self.installer_path):
             reply = QtWidgets.QMessageBox.question(
                 self, 
                 "Install Update",
-                "The application will now close and the installer will start.\n\nContinue?",
+                "The application will close and automatically update to the new version.\n\nContinue?",
                 QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No
             )
             
             if reply == QtWidgets.QMessageBox.Yes:
-                success, error = self.update_checker.install_update(self.installer_path)
-                if success:
+                # Get current EXE path
+                if getattr(sys, 'frozen', False):
+                    current_exe = sys.executable
+                else:
+                    # Running from source, use a test path
+                    current_exe = os.path.join(os.getcwd(), "NARONG_CCTV_TEAM.exe")
+                
+                # Launch updater script
+                try:
+                    updater_script = os.path.join(os.path.dirname(current_exe), "updater.py")
+                    if not os.path.exists(updater_script):
+                        # Extract updater from resources if bundled
+                        updater_script = self.update_checker.get_resource_path("updater.py")
+                    
+                    # Launch updater with pythonw (hidden window)
+                    python_exe = sys.executable if not getattr(sys, 'frozen', False) else "pythonw.exe"
+                    subprocess.Popen([python_exe, updater_script, current_exe, self.installer_path], 
+                                   shell=False, 
+                                   creationflags=subprocess.CREATE_NO_WINDOW if sys.platform == 'win32' else 0)
+                    
+                    # Close the application
                     self.accept()
                     QtWidgets.QApplication.quit()
-                else:
-                    QtWidgets.QMessageBox.critical(self, "Error", error)
+                    
+                except Exception as e:
+                    QtWidgets.QMessageBox.critical(self, "Update Error", 
+                                                  f"Failed to launch updater:\n{str(e)}\n\nPlease manually replace the old file.")
     
     def skip_version(self):
         """Skip this version"""

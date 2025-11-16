@@ -1,5 +1,5 @@
 {
-  "current_version": "8.2.0",
+  "current_version": "8.3.0",
   "app_name": "NARONG CCTV TEAM - Camera Monitor",
   "update_check_url": "https://raw.githubusercontent.com/chhany007/narong-cctv-team/main/version.json",
   "check_on_startup": true,

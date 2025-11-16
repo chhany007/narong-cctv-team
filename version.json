@@ -1,12 +1,12 @@
 {
-  "version": "8.2.0",
-  "download_url": "https://github.com/chhany007/narong-cctv-team/releases/download/v8.2.0/NARONG_CCTV_TEAM.exe",
-  "installer_url": "https://github.com/chhany007/narong-cctv-team/releases/download/v8.2.0/NARONG_CCTV_Team_Setup_v8.2.0.exe",
-  "release_notes": "🎉 What's New in v8.2.0:\n\n✨ NEW FEATURES:\n  • Enhanced NVR Camera Extraction\n    - Added Hikvision ISAPI support (most reliable method)\n    - Added Dahua API support for Dahua NVRs\n    - Improved channel detection with IP and port info\n    - Better status detection (online/offline)\n    - More detailed logging for troubleshooting\n\n  • Taskbar Icon\n    - Application logo now appears in Windows taskbar\n    - Better branding and easier identification\n\n🐛 BUG FIXES:\n  • Fixed update system crash on startup\n  • Fixed resource path issues in bundled EXE\n  • Improved NVR timeout handling\n\n⚡ PERFORMANCE:\n  • Increased NVR fetch timeout from 2s to 3s\n  • Better error handling for network issues\n  • More efficient camera discovery\n\n📝 OTHER IMPROVEMENTS:\n  • Enhanced logging for NVR operations\n  • Better XML parsing for Hikvision devices\n  • Improved Dahua config parsing\n  • Cleaner codebase",
+  "version": "8.3.0",
+  "download_url": "https://github.com/chhany007/narong-cctv-team/releases/download/v8.3.0/NARONG_CCTV_TEAM.exe",
+  "installer_url": "https://github.com/chhany007/narong-cctv-team/releases/download/v8.3.0/NARONG_CCTV_Team_Setup_v8.3.0.exe",
+  "release_notes": "🎉 What's New in v8.3.0:\n\n✨ NEW FEATURES:\n  • Automatic Update Installation\n    - No more manual file replacement\n    - App closes, updates, and restarts automatically\n    - Safe backup and rollback on failure\n\n  • Improved User Interface\n    - Renamed 'Check for Updates' to 'Update' (shorter)\n    - Moved Update button to end of toolbar (next to search)\n    - Renamed 'Quick Workflow' to 'Quick Sync' (clearer)\n\n  • Fixed NVR Switching Bug\n    - Check operations now cancel when switching NVRs\n    - No more row misalignment issues\n    - Separate checking for each NVR\n\n🐛 BUG FIXES:\n  • Fixed camera check continuing on wrong NVR after switch\n  • Fixed row index mismatch during parallel checks\n  • Improved check cancellation logic\n\n⚡ PERFORMANCE:\n  • Better thread management for checks\n  • Cleaner operation cancellation\n  • Reduced UI blocking during updates\n\n📝 OTHER IMPROVEMENTS:\n  • Added updater.py for automatic file replacement\n  • Better error handling in update process\n  • Cleaner toolbar layout\n  • Enhanced logging for troubleshooting",
   "release_date": "2025-11-16",
-  "file_size": 108046595,
+  "file_size": 110000000,
   "installer_size": 0,
-  "checksum": "2AE83F97018DCB90D8B20E27185551C6FFDDAD9D65D2F3D547897B7EB3E1103A",
+  "checksum": "PLACEHOLDER_CHECKSUM",
   "installer_checksum": "",
   "required": false,
   "portable": true

@@ -1120,6 +1120,7 @@ class CameraMonitor(QtWidgets.QMainWindow):
         self.filtered = []
         self.check_history = {}  # persistent map: ip -> {status, device_type, model, timestamp}
         self.creds_meta = load_creds_meta()
+        self.current_check_id = 0  # Track current check operation to cancel on NVR switch
 
         # Set window icon if logo exists
         logo_path = self.get_resource_path(LOGO_FILE)
@@ -1161,7 +1162,7 @@ class CameraMonitor(QtWidgets.QMainWindow):
         # SADP discovery button
         self.btn_sadp = QtWidgets.QPushButton("🔧 SADP Tool"); self.btn_sadp.clicked.connect(self.show_sadp_tool)
         # Automated workflow button
-        self.btn_workflow = QtWidgets.QPushButton("🚀 Quick Workflow"); self.btn_workflow.clicked.connect(self.show_workflow_wizard)
+        self.btn_workflow = QtWidgets.QPushButton("⚡ Quick Sync"); self.btn_workflow.clicked.connect(self.show_workflow_wizard)
         self.btn_workflow.setStyleSheet("QPushButton { background-color: #e74c3c; color: white; font-weight: bold; padding: 6px; border-radius: 4px; }")
         # Search bar with more space
         self.search = QtWidgets.QLineEdit(); 
@@ -1176,12 +1177,12 @@ class CameraMonitor(QtWidgets.QMainWindow):
         top.addWidget(self.btn_check_live)
         top.addWidget(self.btn_sadp)
         top.addWidget(self.btn_workflow)
-        # Add update button
+        top.addStretch()
+        # Add update button at the end
         if UPDATE_MANAGER_AVAILABLE:
-            self.btn_update = QtWidgets.QPushButton("🔄 Check for Updates")
+            self.btn_update = QtWidgets.QPushButton("🔄 Update")
             self.btn_update.clicked.connect(self.check_for_updates_manual)
             top.addWidget(self.btn_update)
-        top.addStretch()
         top.addWidget(self.search)
         vbox.addLayout(top)
 
@@ -1351,6 +1352,9 @@ class CameraMonitor(QtWidgets.QMainWindow):
         cams = [c for c in self.cams if c.get("nvr","").strip().lower() == name]
         self.filtered = cams; self.populate_table(self.filtered)
         self.status.showMessage(f"{len(self.filtered)} cameras for {n.get('name','')}")
+        
+        # Cancel any ongoing check operations by incrementing check ID
+        self.current_check_id += 1
 
     def filter_table(self):
         q = self.search.text().strip().lower()
@@ -1367,12 +1371,18 @@ class CameraMonitor(QtWidgets.QMainWindow):
         if not rows:
             QtWidgets.QMessageBox.information(self, "Check", "Select camera rows first.")
             return
+        # Increment check ID to cancel any previous operations
+        self.current_check_id += 1
+        check_id = self.current_check_id
         targets = [{"row": r, "ip": self.table.item(r,2).text().strip()} for r in rows if self.table.item(r,2)]
-        threading.Thread(target=self._run_checks, args=(targets,), daemon=True).start()
+        threading.Thread(target=self._run_checks, args=(targets, check_id), daemon=True).start()
 
     def check_all(self):
+        # Increment check ID to cancel any previous operations
+        self.current_check_id += 1
+        check_id = self.current_check_id
         targets = [{"row": r, "ip": self.table.item(r,2).text().strip()} for r in range(self.table.rowCount()) if self.table.item(r,2)]
-        threading.Thread(target=self._run_checks, args=(targets,), daemon=True).start()
+        threading.Thread(target=self._run_checks, args=(targets, check_id), daemon=True).start()
 
     def check_live_status(self):
         """Check camera live status via NVR API or SADP."""
@@ -1578,10 +1588,15 @@ class CameraMonitor(QtWidgets.QMainWindow):
         except Exception:
             event.accept()
 
-    def _run_checks(self, targets):
+    def _run_checks(self, targets, check_id=None):
         self.status.showMessage(f"Checking {len(targets)} cameras...")
         checked_count = 0
         for t in targets:
+            # Check if this operation was cancelled by NVR switch
+            if check_id is not None and check_id != self.current_check_id:
+                self.status.showMessage(f"Check cancelled (switched NVR)")
+                return
+                
             row = t["row"]; ip = t["ip"]
             try:
                 # Try SADP first (Hikvision UDP discovery - most reliable, faster timeout)
