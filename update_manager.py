@@ -166,9 +166,20 @@ class UpdateChecker:
             total_size = int(response.headers.get('content-length', 0))
             downloaded = 0
             
-            # Save to temp directory
-            temp_dir = os.path.join(os.path.expanduser('~'), 'AppData', 'Local', 'Temp')
-            download_path = os.path.join(temp_dir, f"NARONG_CCTV_Update_{update_info.version}.exe")
+            # Save to app directory (same folder as current executable)
+            if getattr(sys, 'frozen', False):
+                app_dir = os.path.dirname(sys.executable)
+            else:
+                app_dir = os.path.dirname(os.path.abspath(__file__))
+            
+            download_path = os.path.join(app_dir, f"NARONG_CCTV_Update_{update_info.version}.exe")
+            
+            # Remove old update file if exists
+            if os.path.exists(download_path):
+                try:
+                    os.remove(download_path)
+                except:
+                    pass
             
             with open(download_path, 'wb') as f:
                 for chunk in response.iter_content(chunk_size=8192):
