@@ -1,12 +1,12 @@
 {
-  "version": "8.4.1",
-  "download_url": "https://github.com/chhany007/narong-cctv-team/releases/download/v8.4.1/NARONG_CCTV_TEAM.exe",
-  "installer_url": "https://github.com/chhany007/narong-cctv-team/releases/download/v8.4.1/NARONG_CCTV_Team_Setup_v8.4.1.exe",
-  "release_notes": "🎉 What's New in v8.4.1:\n\n🐛 BUG FIXES:\n  • Fixed download permission error\n    - Update now downloads to app folder (not Temp)\n    - Eliminates 'Permission denied' errors\n    - More reliable update downloads\n\n✨ NEW FEATURES (from v8.4.0):\n  • Fixed Auto-Update System\n    - Updates replace file in current folder\n    - Old file automatically deleted\n    - In-place version replacement\n\n  • Auto-Load Excel File\n    - ip.xlsx loads automatically on startup\n    - No manual 'Load Excel' needed\n    - Faster workflow\n\n  • Status Bar Counters\n    - Real-time Total cameras count\n    - 🟢 Online cameras (green)\n    - 🔴 Offline cameras (red)\n    - Always visible bottom right\n\n  • UI Improvements\n    - Renamed 'Update' to 'Updates'\n\n⚡ PERFORMANCE:\n  • Better file handling during updates\n  • Cleaner download process\n  • Improved error handling",
+  "version": "8.4.2",
+  "download_url": "https://github.com/chhany007/narong-cctv-team/releases/download/v8.4.2/NARONG_CCTV_TEAM.exe",
+  "installer_url": "https://github.com/chhany007/narong-cctv-team/releases/download/v8.4.2/NARONG_CCTV_Team_Setup_v8.4.2.exe",
+  "release_notes": "🎉 What's New in v8.4.2:\n\n🐛 CRITICAL BUG FIX:\n  • Fixed updater not replacing old version\n    - Now uses compiled updater.exe (not Python script)\n    - Properly replaces EXE at original location\n    - Desktop shortcuts work correctly after update\n    - Old version is deleted successfully\n\n✨ NEW FEATURES (from v8.4.x):\n  • Fixed Auto-Update System\n    - Updates replace file in current folder\n    - Downloads to app folder (no permission errors)\n    - In-place version replacement\n\n  • Auto-Load Excel File\n    - ip.xlsx loads automatically on startup\n    - No manual 'Load Excel' needed\n\n  • Status Bar Counters\n    - Real-time Total cameras count\n    - 🟢 Online cameras (green)\n    - 🔴 Offline cameras (red)\n    - Always visible bottom right\n\n  • UI Improvements\n    - Renamed 'Update' to 'Updates'\n\n⚡ PERFORMANCE:\n  • Better update file handling\n  • Cleaner file replacement\n  • Improved reliability",
   "release_date": "2025-11-17",
-  "file_size": 108049711,
+  "file_size": 115100366,
   "installer_size": 0,
-  "checksum": "D5027C3B6D60AD163FE231495CF32FE35DD7446D932DE0992EE7499D885ECCE5",
+  "checksum": "D0CE671AC85200232DF9DEE74949FDD23E20A6F65BCA03265B746CBEEB3E16C6",
   "installer_checksum": "",
   "required": false,
   "portable": true

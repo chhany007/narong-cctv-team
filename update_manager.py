@@ -222,24 +222,17 @@ class UpdateChecker:
             else:
                 current_exe = os.path.abspath(sys.argv[0])
             
-            # Get updater script path
-            updater_script = self.get_resource_path('updater.py')
+            # Get updater executable path
+            updater_exe = self.get_resource_path('updater.exe')
             
-            if not os.path.exists(updater_script):
-                return False, "Updater script not found"
+            if not os.path.exists(updater_exe):
+                return False, "Updater executable not found"
             
             # Launch updater with both paths
-            if getattr(sys, 'frozen', False):
-                # Running as EXE - use bundled Python to run updater
-                subprocess.Popen(
-                    [sys.executable, updater_script, current_exe, installer_path],
-                    creationflags=subprocess.CREATE_NO_WINDOW if sys.platform == 'win32' else 0
-                )
-            else:
-                # Running as script
-                subprocess.Popen(
-                    [sys.executable, updater_script, current_exe, installer_path]
-                )
+            subprocess.Popen(
+                [updater_exe, current_exe, installer_path],
+                creationflags=subprocess.CREATE_NO_WINDOW if sys.platform == 'win32' else 0
+            )
             
             return True, None
         except Exception as e:
