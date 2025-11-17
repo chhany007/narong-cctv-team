@@ -1112,7 +1112,7 @@ class CameraMonitor(QtWidgets.QMainWindow):
 
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("🔐 NARONG CCTV TEAM - Camera Monitor v8")
+        self.setWindowTitle("🔐 NARONG CCTV TEAM v8.4.2")
         self.resize(1150, 700)
         self.vlc = find_vlc_executable()
         self.nvrs = []

@@ -1,12 +1,12 @@
 {
-  "version": "8.4.2",
-  "download_url": "https://github.com/chhany007/narong-cctv-team/releases/download/v8.4.2/NARONG_CCTV_TEAM.exe",
-  "installer_url": "https://github.com/chhany007/narong-cctv-team/releases/download/v8.4.2/NARONG_CCTV_Team_Setup_v8.4.2.exe",
-  "release_notes": "🎉 What's New in v8.4.2:\n\n🐛 CRITICAL BUG FIX:\n  • Fixed updater not replacing old version\n    - Now uses compiled updater.exe (not Python script)\n    - Properly replaces EXE at original location\n    - Desktop shortcuts work correctly after update\n    - Old version is deleted successfully\n\n✨ NEW FEATURES (from v8.4.x):\n  • Fixed Auto-Update System\n    - Updates replace file in current folder\n    - Downloads to app folder (no permission errors)\n    - In-place version replacement\n\n  • Auto-Load Excel File\n    - ip.xlsx loads automatically on startup\n    - No manual 'Load Excel' needed\n\n  • Status Bar Counters\n    - Real-time Total cameras count\n    - 🟢 Online cameras (green)\n    - 🔴 Offline cameras (red)\n    - Always visible bottom right\n\n  • UI Improvements\n    - Renamed 'Update' to 'Updates'\n\n⚡ PERFORMANCE:\n  • Better update file handling\n  • Cleaner file replacement\n  • Improved reliability",
+  "version": "8.4.3",
+  "download_url": "https://github.com/chhany007/narong-cctv-team/releases/download/v8.4.3/NARONG_CCTV_TEAM.exe",
+  "installer_url": "https://github.com/chhany007/narong-cctv-team/releases/download/v8.4.3/NARONG_CCTV_Team_Setup_v8.4.3.exe",
+  "release_notes": "🎉 What's New in v8.4.3:\n\n✨ UI IMPROVEMENTS:\n  • Shortened window title\n    - Changed from 'NARONG CCTV TEAM - Camera Monitor v8'\n    - Now shows 'NARONG CCTV TEAM v8.4.3'\n    - Cleaner and more compact\n    - Version number follows releases\n\n🐛 FIXES (from v8.4.x):\n  • Working auto-update system\n    - Uses compiled updater.exe\n    - Replaces file at original location\n    - Desktop shortcuts work correctly\n    - Old version deleted successfully\n\n✨ FEATURES:\n  • Auto-load Excel on startup\n  • Status bar with Total/Online/Offline counters\n  • Downloads to app folder (no permission errors)\n  • In-place update replacement\n\n⚡ PERFORMANCE:\n  • Better file handling\n  • Reliable updates\n  • Improved user experience",
   "release_date": "2025-11-17",
-  "file_size": 115100366,
+  "file_size": 115100547,
   "installer_size": 0,
-  "checksum": "D0CE671AC85200232DF9DEE74949FDD23E20A6F65BCA03265B746CBEEB3E16C6",
+  "checksum": "779B1C6543101C20824B38EDF739188DD130EAFDA879D99F1ED450C1120289DF",
   "installer_checksum": "",
   "required": false,
   "portable": true
