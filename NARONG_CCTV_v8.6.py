@@ -25,7 +25,8 @@ Advanced Camera Monitoring and NVR Management System
 Developed by Sky-Tech for Koh Kong Casino
 """
 
-import os, sys, json, csv, time, socket, threading, subprocess, webbrowser, traceback, unicodedata, re, platform, logging
+import os, sys, json, csv, time, socket, threading, subprocess, webbrowser, traceback, unicodedata, re, platform, logging, hashlib, uuid
+from datetime import datetime, timedelta
 from PyQt5 import QtCore, QtGui, QtWidgets
 import pandas as pd
 import concurrent.futures
@@ -405,14 +406,21 @@ class WorkingNVRController:
 
 # ==================== APPLICATION CONFIGURATION ====================
 # Version and metadata - Enhanced Edition
-APP_VERSION = "8.7.0"
+APP_VERSION = "8.8.0"
 APP_TITLE = "NARONG CCTV Monitor"
 APP_COMPANY = "Sky-Tech"
-APP_ID = "SkyTech.CameraMonitor.8.7.0"
+APP_ID = "SkyTech.CameraMonitor.8.8.0"
 BUILD_DATE = "2025-11-23"
+
+# License configuration
+LICENSE_FILE = "license.key"
+LICENSE_SALT = b"NarongCCTV_SkyTech_2025_SecureKey"  # Salt for encryption
+TRIAL_DAYS = 30  # Trial period days
+REQUIRES_LICENSE = True  # Set to False to disable license requirement
 ENHANCED_FEATURES = [
-    "Professional Export Reports (Excel/Word/PDF)",
-    "SADP Device Discovery Tool",
+    "Professional Export Reports (Excel/Word/PDF with NVR Grouping)",
+    "Enhanced SADP Device Discovery Tool",
+    "License Key Management System",
     "Smart Offline Camera Verification",
     "Enhanced Duplicate Detection",
     "Optimized Parallel Processing",
@@ -1678,6 +1686,346 @@ def get_enhanced_nvr_configs():
     
     return default_configs
 
+# ==================== LICENSE MANAGEMENT SYSTEM ====================
+def get_machine_id():
+    """Generate unique machine identifier based on hardware"""
+    try:
+        # Get MAC address
+        mac = ':'.join(['{:02x}'.format((uuid.getnode() >> elements) & 0xff) 
+                       for elements in range(0,2*6,2)][::-1])
+        # Get computer name
+        hostname = socket.gethostname()
+        # Combine and hash
+        machine_str = f"{mac}_{hostname}_{platform.node()}"
+        return hashlib.sha256(machine_str.encode()).hexdigest()[:16]
+    except:
+        return "UNKNOWN_MACHINE"
+
+def generate_license_key(machine_id, expiry_date, license_type="PROFESSIONAL"):
+    """Generate license key with machine binding and expiration"""
+    data = f"{machine_id}|{expiry_date.strftime('%Y-%m-%d')}|{license_type}"
+    signature = hashlib.sha256((data + LICENSE_SALT.decode('latin-1')).encode()).hexdigest()
+    key = f"{machine_id}-{expiry_date.strftime('%Y%m%d')}-{license_type[:3].upper()}-{signature[:8].upper()}"
+    return key
+
+def validate_license_key(license_key, machine_id):
+    """Validate license key against machine ID and check expiration"""
+    try:
+        parts = license_key.strip().split('-')
+        if len(parts) != 4:
+            return False, "Invalid key format"
+        
+        key_machine_id, key_date, key_type, key_sig = parts
+        
+        # Check machine binding
+        if key_machine_id != machine_id:
+            return False, "License not valid for this machine"
+        
+        # Check expiration
+        expiry_date = datetime.strptime(key_date, '%Y%m%d')
+        if datetime.now() > expiry_date:
+            return False, f"License expired on {expiry_date.strftime('%Y-%m-%d')}"
+        
+        # Verify signature
+        data = f"{key_machine_id}|{expiry_date.strftime('%Y-%m-%d')}|{key_type}"
+        expected_sig = hashlib.sha256((data + LICENSE_SALT.decode('latin-1')).encode()).hexdigest()[:8].upper()
+        
+        if key_sig != expected_sig:
+            return False, "Invalid license signature"
+        
+        days_remaining = (expiry_date - datetime.now()).days
+        return True, f"Valid until {expiry_date.strftime('%Y-%m-%d')} ({days_remaining} days remaining)"
+        
+    except Exception as e:
+        return False, f"Validation error: {str(e)}"
+
+def save_license_key(license_key):
+    """Save license key to file"""
+    try:
+        with open(LICENSE_FILE, 'w') as f:
+            f.write(license_key)
+        return True
+    except:
+        return False
+
+def load_license_key():
+    """Load license key from file"""
+    try:
+        if os.path.exists(LICENSE_FILE):
+            with open(LICENSE_FILE, 'r') as f:
+                return f.read().strip()
+    except:
+        pass
+    return None
+
+def check_trial_status():
+    """Check if trial period is active"""
+    trial_file = "trial.dat"
+    try:
+        if os.path.exists(trial_file):
+            with open(trial_file, 'r') as f:
+                install_date_str = f.read().strip()
+                install_date = datetime.fromisoformat(install_date_str)
+                days_used = (datetime.now() - install_date).days
+                days_remaining = TRIAL_DAYS - days_used
+                if days_remaining > 0:
+                    return True, f"Trial: {days_remaining} days remaining"
+                else:
+                    return False, "Trial period expired"
+        else:
+            # First run - create trial file
+            with open(trial_file, 'w') as f:
+                f.write(datetime.now().isoformat())
+            return True, f"Trial: {TRIAL_DAYS} days remaining"
+    except:
+        return False, "Trial status unknown"
+
+class LicenseDialog(QtWidgets.QDialog):
+    """License activation dialog"""
+    def __init__(self, parent=None, machine_id=""):
+        super().__init__(parent)
+        self.machine_id = machine_id
+        self.license_valid = False
+        self.init_ui()
+    
+    def init_ui(self):
+        self.setWindowTitle("🔐 License Activation - NARONG CCTV Monitor")
+        self.setMinimumWidth(600)
+        self.setMinimumHeight(500)
+        self.setModal(True)
+        
+        # Set window background
+        self.setStyleSheet("""
+            QDialog {
+                background-color: #f8f9fa;
+            }
+            QGroupBox {
+                font-weight: bold;
+                border: 2px solid #dee2e6;
+                border-radius: 6px;
+                margin-top: 8px;
+                padding-top: 8px;
+                background-color: white;
+            }
+            QGroupBox::title {
+                subcontrol-origin: margin;
+                left: 12px;
+                padding: 0 5px;
+            }
+        """)
+        
+        layout = QtWidgets.QVBoxLayout(self)
+        layout.setSpacing(12)
+        layout.setContentsMargins(15, 15, 15, 15)
+        
+        # Simple header text
+        header = QtWidgets.QLabel(f"<h2 style='color: #2c3e50; margin: 0;'>🔐 NARONG CCTV Monitor v{APP_VERSION}</h2>")
+        header.setAlignment(QtCore.Qt.AlignCenter)
+        header.setStyleSheet("padding: 10px; background-color: #e9ecef; border-radius: 6px;")
+        layout.addWidget(header)
+        
+        # Machine ID section
+        machine_group = QtWidgets.QGroupBox("🖥️ Machine Information")
+        machine_layout = QtWidgets.QVBoxLayout()
+        machine_layout.setSpacing(8)
+        
+        # Machine ID display with copy button
+        id_container = QtWidgets.QHBoxLayout()
+        machine_info = QtWidgets.QLineEdit(self.machine_id)
+        machine_info.setReadOnly(True)
+        machine_info.setFont(QtGui.QFont("Courier New", 10))
+        machine_info.setStyleSheet("""
+            QLineEdit {
+                background-color: #f8f9fa;
+                border: 1px solid #ced4da;
+                border-radius: 4px;
+                padding: 8px;
+                color: #495057;
+            }
+        """)
+        machine_info.setAlignment(QtCore.Qt.AlignCenter)
+        id_container.addWidget(machine_info)
+        
+        copy_btn = QtWidgets.QPushButton("📋 Copy")
+        copy_btn.setStyleSheet("""
+            QPushButton {
+                background-color: #17a2b8;
+                color: white;
+                font-weight: bold;
+                padding: 8px 16px;
+                border-radius: 4px;
+                border: none;
+            }
+            QPushButton:hover {
+                background-color: #138496;
+            }
+        """)
+        copy_btn.clicked.connect(lambda: (QtWidgets.QApplication.clipboard().setText(self.machine_id),
+                                          self.show_copy_confirmation()))
+        id_container.addWidget(copy_btn)
+        machine_layout.addLayout(id_container)
+        
+        info_label = QtWidgets.QLabel(
+            "<i style='color: #6c757d; font-size: 11px;'>Send this ID to obtain a license key</i>"
+        )
+        info_label.setWordWrap(True)
+        info_label.setStyleSheet("background: transparent;")
+        machine_layout.addWidget(info_label)
+        
+        machine_group.setLayout(machine_layout)
+        layout.addWidget(machine_group)
+        
+        # License key input
+        key_group = QtWidgets.QGroupBox("🔑 License Key")
+        key_layout = QtWidgets.QVBoxLayout()
+        key_layout.setSpacing(8)
+        
+        self.key_input = QtWidgets.QLineEdit()
+        self.key_input.setPlaceholderText("Enter license key...")
+        self.key_input.setFont(QtGui.QFont("Courier New", 10))
+        self.key_input.setStyleSheet("""
+            QLineEdit {
+                background-color: white;
+                border: 1px solid #ced4da;
+                border-radius: 4px;
+                padding: 8px;
+                color: #212529;
+            }
+            QLineEdit:focus {
+                border-color: #007bff;
+            }
+        """)
+        key_layout.addWidget(self.key_input)
+        
+        # Validation status
+        self.status_label = QtWidgets.QLabel("")
+        self.status_label.setWordWrap(True)
+        self.status_label.setStyleSheet("background: transparent; padding: 5px;")
+        self.status_label.setMinimumHeight(30)
+        key_layout.addWidget(self.status_label)
+        
+        key_group.setLayout(key_layout)
+        layout.addWidget(key_group)
+        
+        # Action buttons
+        btn_layout = QtWidgets.QHBoxLayout()
+        btn_layout.setSpacing(10)
+        
+        validate_btn = QtWidgets.QPushButton("✓ Activate License")
+        validate_btn.setMinimumHeight(42)
+        validate_btn.setStyleSheet("""
+            QPushButton {
+                background-color: #28a745;
+                color: white;
+                font-weight: bold;
+                font-size: 14px;
+                padding: 12px 24px;
+                border-radius: 4px;
+                border: none;
+            }
+            QPushButton:hover {
+                background-color: #218838;
+            }
+        """)
+        validate_btn.clicked.connect(self.validate_and_activate)
+        btn_layout.addWidget(validate_btn)
+        
+        exit_btn = QtWidgets.QPushButton("✕ Exit Application")
+        exit_btn.setMinimumHeight(42)
+        exit_btn.setStyleSheet("""
+            QPushButton {
+                background-color: #dc3545;
+                color: white;
+                font-weight: bold;
+                font-size: 14px;
+                padding: 12px 24px;
+                border-radius: 4px;
+                border: none;
+            }
+            QPushButton:hover {
+                background-color: #c82333;
+            }
+        """)
+        exit_btn.clicked.connect(self.reject)
+        btn_layout.addWidget(exit_btn)
+        
+        layout.addLayout(btn_layout)
+        
+        # Contact info
+        contact_container = QtWidgets.QFrame()
+        contact_container.setStyleSheet("""
+            QFrame {
+                background-color: #e8f4f8;
+                border-radius: 4px;
+                padding: 10px;
+                border: 1px solid #bee5eb;
+            }
+        """)
+        contact_layout = QtWidgets.QVBoxLayout(contact_container)
+        contact_layout.setSpacing(6)
+        
+        contact_info = QtWidgets.QLabel(
+            "<span style='color: #0c5460; font-size: 12px;'>"
+            "<b>🔑 Need a License Key?</b><br>"
+            "Use <b>Master Key Generator</b> tool to create keys for users<br>"
+            "Or contact Sky-Tech Support via Telegram</span>"
+        )
+        contact_info.setWordWrap(True)
+        contact_info.setStyleSheet("background: transparent;")
+        contact_layout.addWidget(contact_info)
+        
+        telegram_btn = QtWidgets.QPushButton("📱 Telegram: @chhanycls")
+        telegram_btn.setMinimumHeight(32)
+        telegram_btn.setStyleSheet("""
+            QPushButton {
+                background-color: #0088cc;
+                color: white;
+                font-weight: bold;
+                font-size: 12px;
+                padding: 6px 12px;
+                border-radius: 4px;
+                border: none;
+            }
+            QPushButton:hover {
+                background-color: #006699;
+            }
+        """)
+        telegram_btn.clicked.connect(lambda: webbrowser.open('https://t.me/chhanycls'))
+        telegram_btn.setCursor(QtCore.Qt.PointingHandCursor)
+        contact_layout.addWidget(telegram_btn)
+        
+        layout.addWidget(contact_container)
+    
+    def show_copy_confirmation(self):
+        """Show brief confirmation that Machine ID was copied"""
+        self.status_label.setText("✅ Machine ID copied to clipboard!")
+        self.status_label.setStyleSheet("color: #28a745; padding: 8px; background-color: #d4edda; border-radius: 4px; border: 1px solid #c3e6cb;")
+        QtCore.QTimer.singleShot(2000, lambda: self.status_label.setText(""))
+    
+    def validate_and_activate(self):
+        """Validate and activate the entered license key"""
+        license_key = self.key_input.text().strip()
+        if not license_key:
+            self.status_label.setText("❌ Please enter a license key")
+            self.status_label.setStyleSheet("color: #e74c3c; padding: 5px;")
+            return
+        
+        is_valid, message = validate_license_key(license_key, self.machine_id)
+        
+        if is_valid:
+            if save_license_key(license_key):
+                self.status_label.setText(f"✅ {message}")
+                self.status_label.setStyleSheet("color: #27ae60; padding: 5px; background-color: #d5f4e6; border-radius: 3px;")
+                self.license_valid = True
+                QtWidgets.QMessageBox.information(self, "Success", f"License activated successfully!\n\n{message}")
+                self.accept()
+            else:
+                self.status_label.setText("❌ Failed to save license key")
+                self.status_label.setStyleSheet("color: #e74c3c; padding: 5px;")
+        else:
+            self.status_label.setText(f"❌ {message}")
+            self.status_label.setStyleSheet("color: #e74c3c; padding: 5px; background-color: #fadbd8; border-radius: 3px;")
+    
 # ---------------- GUI ----------------
 class CameraMonitor(QtWidgets.QMainWindow):
     table_update = QtCore.pyqtSignal(int, str, str, str, object, str)
@@ -1785,6 +2133,29 @@ class CameraMonitor(QtWidgets.QMainWindow):
 
     def __init__(self):
         super().__init__()
+        
+        # ==================== LICENSE VALIDATION ====================
+        if REQUIRES_LICENSE:
+            machine_id = get_machine_id()
+            license_key = load_license_key()
+            license_valid = False
+            
+            if license_key:
+                is_valid, message = validate_license_key(license_key, machine_id)
+                if is_valid:
+                    license_valid = True
+                    log(f"[LICENSE] Valid license: {message}")
+                else:
+                    log(f"[LICENSE] Invalid license: {message}")
+            
+            # Show license dialog if no valid license
+            if not license_valid:
+                license_dlg = LicenseDialog(None, machine_id)
+                if license_dlg.exec_() != QtWidgets.QDialog.Accepted:
+                    # User cancelled or closed dialog - exit application
+                    sys.exit(0)
+        
+        # ==================== APPLICATION INITIALIZATION ====================
         self.setWindowTitle(f"🔐 {APP_TITLE} v{APP_VERSION} Enhanced Edition")
         self.resize(1150, 700)
         self.vlc = find_vlc_executable()
@@ -5271,13 +5642,13 @@ class CameraMonitor(QtWidgets.QMainWindow):
             QtWidgets.QMessageBox.critical(self, "Export error", str(e))
     
     def export_to_excel(self, export_info):
-        """Export to professional Excel with rich styling and advanced formatting"""
+        """Export to professional Excel with NVR-grouped sheets and summary"""
         try:
             from openpyxl import Workbook
             from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
             from openpyxl.utils import get_column_letter
-            from openpyxl.drawing.image import Image as XLImage
             from datetime import datetime
+            from collections import defaultdict
             
             if not self.api_cameras and not self.cams:
                 QtWidgets.QMessageBox.information(self, "Export", "No cameras to export.")
@@ -5294,338 +5665,355 @@ class CameraMonitor(QtWidgets.QMainWindow):
             if not filename:
                 return
             
+            # Group cameras by NVR
+            nvr_groups = defaultdict(list)
+            for cam in camera_source:
+                nvr_name = cam.get('nvr', 'Unknown NVR')
+                nvr_groups[nvr_name].append(cam)
+            
             wb = Workbook()
-            ws = wb.active
-            ws.title = "Camera Report"
+            wb.remove(wb.active)  # Remove default sheet
             
-            # Set print settings for professional appearance
-            ws.print_options.horizontalCentered = True
-            ws.print_options.gridLines = False
-            ws.page_setup.orientation = 'landscape'
-            ws.page_setup.paperSize = 9  # A4
+            # ========== CREATE SUMMARY SHEET ==========
+            summary_ws = wb.create_sheet("📊 Summary", 0)
+            summary_ws.sheet_properties.tabColor = "1F4E78"
             
-            # Freeze panes for scrolling
-            ws.freeze_panes = 'A6'
+            # Summary header
+            summary_ws.merge_cells('A1:F1')
+            header_cell = summary_ws['A1']
+            header_cell.value = f"🏢 {export_info['company_name']} - Camera Summary Report"
+            header_cell.font = Font(size=16, bold=True, color="FFFFFF")
+            header_cell.fill = PatternFill(start_color="1a5490", end_color="1a5490", fill_type="solid")
+            header_cell.alignment = Alignment(horizontal="center", vertical="center")
+            summary_ws.row_dimensions[1].height = 30
             
-            # Company header with gradient effect
-            ws.merge_cells('A1:I1')
-            company_cell = ws['A1']
-            company_cell.value = f"🏢 {export_info['company_name']}"
-            company_cell.font = Font(size=20, bold=True, color="FFFFFF", name='Calibri')
-            company_cell.fill = PatternFill(start_color="1a5490", end_color="1a5490", fill_type="solid")
-            company_cell.alignment = Alignment(horizontal="center", vertical="center")
-            ws.row_dimensions[1].height = 35
-            
-            # Subtitle - Camera Monitoring Report
-            ws.merge_cells('A2:I2')
-            subtitle_cell = ws['A2']
-            subtitle_cell.value = "📹 CAMERA MONITORING SYSTEM REPORT"
-            subtitle_cell.font = Font(size=12, bold=True, color="FFFFFF", name='Calibri')
-            subtitle_cell.fill = PatternFill(start_color="2874a6", end_color="2874a6", fill_type="solid")
-            subtitle_cell.alignment = Alignment(horizontal="center", vertical="center")
-            ws.row_dimensions[2].height = 25
-            
-            # Contact info with icons
-            ws.merge_cells('A3:I3')
-            contact_cell = ws['A3']
-            contact_parts = []
-            if export_info['telephone']:
-                contact_parts.append(f"📞 {export_info['telephone']}")
-            if export_info['telegram']:
-                contact_parts.append(f"✈️ {export_info['telegram']}")
-            contact_cell.value = "  |  ".join(contact_parts) if contact_parts else "🔒 Professional Camera Monitoring System"
-            contact_cell.font = Font(size=11, color="34495e", name='Calibri')
-            contact_cell.fill = PatternFill(start_color="d6eaf8", end_color="d6eaf8", fill_type="solid")
-            contact_cell.alignment = Alignment(horizontal="center", vertical="center")
-            ws.row_dimensions[3].height = 20
-            
-            # Report metadata
-            ws.merge_cells('A4:I4')
-            date_cell = ws['A4']
+            # Date
+            summary_ws.merge_cells('A2:F2')
+            date_cell = summary_ws['A2']
             date_cell.value = f"📅 Generated: {datetime.now().strftime('%A, %B %d, %Y at %I:%M %p')}"
-            date_cell.font = Font(size=10, italic=True, color="7f8c8d", name='Calibri')
+            date_cell.font = Font(size=10, italic=True, color="7f8c8d")
             date_cell.fill = PatternFill(start_color="ebf5fb", end_color="ebf5fb", fill_type="solid")
             date_cell.alignment = Alignment(horizontal="center", vertical="center")
-            ws.row_dimensions[4].height = 18
+            summary_ws.row_dimensions[2].height = 20
             
-            # Current row for headers
-            current_row = 6
+            # Spacer
+            summary_ws.row_dimensions[3].height = 5
             
-            # Rich column headers with icons
-            headers = [
-                ("🚦", "Status"),
-                ("📷", "Camera Name"),
-                ("🌐", "IP Address"),
-                ("📡", "NVR"),
-                ("🔧", "Model"),
-                ("🔌", "Port"),
-                ("🕒", "Last Updated"),
-                ("📊", "Connection"),
-                ("📝", "Remark")
-            ]
-            
-            # Create header row with rich styling
-            for col_num, (icon, header) in enumerate(headers, 1):
-                cell = ws.cell(row=current_row, column=col_num)
-                cell.value = f"{icon}\n{header}"
-                cell.font = Font(bold=True, color="FFFFFF", size=11, name='Calibri')
+            # Summary table headers
+            headers = ["📡 NVR Name", "📷 Total Cameras", "✅ Online", "❌ Offline", "⚠️ Unknown", "📈 Uptime %"]
+            for col, header in enumerate(headers, 1):
+                cell = summary_ws.cell(row=4, column=col)
+                cell.value = header
+                cell.font = Font(bold=True, color="FFFFFF", size=11)
                 cell.fill = PatternFill(start_color="34495e", end_color="34495e", fill_type="solid")
-                cell.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
-                cell.border = Border(
-                    left=Side(style='medium', color='000000'),
-                    right=Side(style='medium', color='000000'),
-                    top=Side(style='medium', color='000000'),
-                    bottom=Side(style='medium', color='000000')
-                )
+                cell.alignment = Alignment(horizontal="center", vertical="center")
+                cell.border = Border(left=Side(style='medium'), right=Side(style='medium'),
+                                   top=Side(style='medium'), bottom=Side(style='medium'))
+            summary_ws.row_dimensions[4].height = 25
             
-            ws.row_dimensions[current_row].height = 35
-            current_row += 1
+            # Summary data rows
+            row_num = 5
+            total_cameras = 0
+            total_online = 0
+            total_offline = 0
+            total_unknown = 0
             
-            # Group cameras by status for better organization
-            online_cams = []
-            offline_cams = []
-            unknown_cams = []
-            
-            for cam in camera_source:
-                status = str(cam.get('status', '')).lower()
-                if 'online' in status or '🟢' in status:
-                    online_cams.append(cam)
-                elif 'offline' in status or '🔴' in status:
-                    offline_cams.append(cam)
+            for nvr_name in sorted(nvr_groups.keys()):
+                cameras = nvr_groups[nvr_name]
+                nvr_total = len(cameras)
+                nvr_online = sum(1 for c in cameras if 'online' in str(c.get('status', '')).lower())
+                nvr_offline = sum(1 for c in cameras if 'offline' in str(c.get('status', '')).lower())
+                nvr_unknown = nvr_total - nvr_online - nvr_offline
+                nvr_uptime = (nvr_online / nvr_total * 100) if nvr_total > 0 else 0
+                
+                total_cameras += nvr_total
+                total_online += nvr_online
+                total_offline += nvr_offline
+                total_unknown += nvr_unknown
+                
+                # NVR Name
+                cell = summary_ws.cell(row=row_num, column=1)
+                cell.value = nvr_name
+                cell.font = Font(bold=True, size=10)
+                cell.alignment = Alignment(horizontal="left", vertical="center")
+                
+                # Total
+                cell = summary_ws.cell(row=row_num, column=2)
+                cell.value = nvr_total
+                cell.font = Font(size=10)
+                cell.alignment = Alignment(horizontal="center", vertical="center")
+                
+                # Online
+                cell = summary_ws.cell(row=row_num, column=3)
+                cell.value = nvr_online
+                cell.font = Font(size=10, color="27ae60", bold=True)
+                cell.fill = PatternFill(start_color="d5f4e6", end_color="d5f4e6", fill_type="solid")
+                cell.alignment = Alignment(horizontal="center", vertical="center")
+                
+                # Offline
+                cell = summary_ws.cell(row=row_num, column=4)
+                cell.value = nvr_offline
+                cell.font = Font(size=10, color="c0392b", bold=True)
+                cell.fill = PatternFill(start_color="fadbd8", end_color="fadbd8", fill_type="solid")
+                cell.alignment = Alignment(horizontal="center", vertical="center")
+                
+                # Unknown
+                cell = summary_ws.cell(row=row_num, column=5)
+                cell.value = nvr_unknown
+                cell.font = Font(size=10, color="d68910", bold=True)
+                cell.fill = PatternFill(start_color="fcf3cf", end_color="fcf3cf", fill_type="solid")
+                cell.alignment = Alignment(horizontal="center", vertical="center")
+                
+                # Uptime %
+                cell = summary_ws.cell(row=row_num, column=6)
+                cell.value = f"{nvr_uptime:.1f}%"
+                cell.font = Font(size=10, bold=True)
+                if nvr_uptime >= 90:
+                    cell.font = Font(size=10, bold=True, color="27ae60")
+                elif nvr_uptime >= 70:
+                    cell.font = Font(size=10, bold=True, color="f39c12")
                 else:
-                    unknown_cams.append(cam)
-            
-            # Data rows with rich formatting
-            def add_camera_row(cam, row_num, status_type):
-                status = str(cam.get('status', '')).lower()
+                    cell.font = Font(size=10, bold=True, color="c0392b")
+                cell.alignment = Alignment(horizontal="center", vertical="center")
                 
-                # Status cell with icon and color
-                status_cell = ws.cell(row=row_num, column=1)
-                if status_type == 'online':
-                    status_cell.value = "✅ ONLINE"
-                    status_cell.fill = PatternFill(start_color="d5f4e6", end_color="d5f4e6", fill_type="solid")
-                    status_cell.font = Font(color="27ae60", bold=True, size=10, name='Calibri')
-                elif status_type == 'offline':
-                    status_cell.value = "❌ OFFLINE"
-                    status_cell.fill = PatternFill(start_color="fadbd8", end_color="fadbd8", fill_type="solid")
-                    status_cell.font = Font(color="c0392b", bold=True, size=10, name='Calibri')
-                else:
-                    status_cell.value = "⚠️ UNKNOWN"
-                    status_cell.fill = PatternFill(start_color="fcf3cf", end_color="fcf3cf", fill_type="solid")
-                    status_cell.font = Font(color="d68910", bold=True, size=10, name='Calibri')
+                # Add borders
+                for col in range(1, 7):
+                    summary_ws.cell(row=row_num, column=col).border = Border(
+                        left=Side(style='thin', color='bdc3c7'),
+                        right=Side(style='thin', color='bdc3c7'),
+                        top=Side(style='thin', color='bdc3c7'),
+                        bottom=Side(style='thin', color='bdc3c7')
+                    )
                 
-                status_cell.alignment = Alignment(horizontal="center", vertical="center")
-                
-                # Camera Name with bold
-                name_cell = ws.cell(row=row_num, column=2)
-                name_cell.value = cam.get('name', 'Unnamed')
-                name_cell.font = Font(bold=True, size=10, name='Calibri')
-                name_cell.alignment = Alignment(horizontal="left", vertical="center")
-                
-                # IP Address with monospace style
-                ip_cell = ws.cell(row=row_num, column=3)
-                ip_cell.value = cam.get('ip', '')
-                ip_cell.font = Font(size=10, name='Courier New', color="154360")
-                ip_cell.alignment = Alignment(horizontal="center", vertical="center")
-                
-                # NVR
-                nvr_cell = ws.cell(row=row_num, column=4)
-                nvr_cell.value = cam.get('nvr', '')
-                nvr_cell.font = Font(size=10, name='Calibri')
-                nvr_cell.alignment = Alignment(horizontal="center", vertical="center")
-                
-                # Model
-                model_cell = ws.cell(row=row_num, column=5)
-                model_cell.value = cam.get('model', '')
-                model_cell.font = Font(size=9, name='Calibri', color="566573")
-                model_cell.alignment = Alignment(horizontal="left", vertical="center")
-                
-                # Port
-                port_cell = ws.cell(row=row_num, column=6)
-                port_cell.value = str(cam.get('port', ''))
-                port_cell.font = Font(size=10, name='Calibri')
-                port_cell.alignment = Alignment(horizontal="center", vertical="center")
-                
-                # Last Updated
-                updated_cell = ws.cell(row=row_num, column=7)
-                updated_cell.value = cam.get('last_updated', '')
-                updated_cell.font = Font(size=9, name='Calibri', italic=True)
-                updated_cell.alignment = Alignment(horizontal="center", vertical="center")
-                
-                # Connection Type (if available)
-                conn_cell = ws.cell(row=row_num, column=8)
-                conn_type = cam.get('connection_type', '')
-                if conn_type:
-                    conn_cell.value = conn_type.replace('_', ' ').title()
-                    if 'digest' in conn_type.lower():
-                        conn_cell.font = Font(size=9, color="16a085", name='Calibri')
-                    else:
-                        conn_cell.font = Font(size=9, color="7f8c8d", name='Calibri')
-                else:
-                    conn_cell.value = "Standard"
-                    conn_cell.font = Font(size=9, color="95a5a6", name='Calibri')
-                conn_cell.alignment = Alignment(horizontal="center", vertical="center")
-                
-                # Remark
-                remark_cell = ws.cell(row=row_num, column=9)
-                remark_cell.value = cam.get('remark', '')
-                remark_cell.font = Font(size=9, name='Calibri', color="7f8c8d", italic=True)
-                remark_cell.alignment = Alignment(horizontal="left", vertical="center")
-                
-                # Add borders to all cells with alternating row background
-                border_style = Border(
-                    left=Side(style='thin', color='bdc3c7'),
-                    right=Side(style='thin', color='bdc3c7'),
-                    top=Side(style='thin', color='bdc3c7'),
-                    bottom=Side(style='thin', color='bdc3c7')
-                )
-                
-                # Alternating row colors for better readability
+                # Alternating rows
                 if row_num % 2 == 0:
-                    bg_color = "ffffff"  # White
-                else:
-                    bg_color = "f8f9fa"  # Light gray
+                    for col in range(1, 7):
+                        if col not in [3, 4, 5]:  # Don't override status colors
+                            summary_ws.cell(row=row_num, column=col).fill = PatternFill(
+                                start_color="f8f9fa", end_color="f8f9fa", fill_type="solid"
+                            )
                 
-                for col in range(1, 10):
-                    cell = ws.cell(row=row_num, column=col)
-                    cell.border = border_style
-                    # Don't override status cell background
-                    if col != 1 and not cell.fill.start_color.rgb:
-                        cell.fill = PatternFill(start_color=bg_color, end_color=bg_color, fill_type="solid")
-                
-                ws.row_dimensions[row_num].height = 20
+                row_num += 1
             
-            # Add section headers and cameras grouped by status
-            def add_section_header(row_num, title, color, count):
-                ws.merge_cells(f'A{row_num}:I{row_num}')
-                section_cell = ws[f'A{row_num}']
-                section_cell.value = f"  {title} ({count} cameras)"
-                section_cell.font = Font(bold=True, size=11, color="FFFFFF", name='Calibri')
-                section_cell.fill = PatternFill(start_color=color, end_color=color, fill_type="solid")
-                section_cell.alignment = Alignment(horizontal="left", vertical="center")
-                ws.row_dimensions[row_num].height = 25
-                return row_num + 1
+            # Total row
+            row_num += 1
+            summary_ws.merge_cells(f'A{row_num}:F{row_num}')
+            spacer_cell = summary_ws[f'A{row_num}']
+            spacer_cell.fill = PatternFill(start_color="34495e", end_color="34495e", fill_type="solid")
+            summary_ws.row_dimensions[row_num].height = 3
+            row_num += 1
             
-            # Online cameras section
-            if online_cams:
-                current_row = add_section_header(current_row, "🟢 ONLINE CAMERAS", "27ae60", len(online_cams))
-                for cam in online_cams:
-                    add_camera_row(cam, current_row, 'online')
-                    current_row += 1
-                current_row += 1  # Add spacing
+            total_uptime = (total_online / total_cameras * 100) if total_cameras > 0 else 0
             
-            # Offline cameras section
-            if offline_cams:
-                current_row = add_section_header(current_row, "🔴 OFFLINE CAMERAS", "e74c3c", len(offline_cams))
-                for cam in offline_cams:
-                    add_camera_row(cam, current_row, 'offline')
-                    current_row += 1
-                current_row += 1  # Add spacing
+            cell = summary_ws.cell(row=row_num, column=1)
+            cell.value = "🏁 GRAND TOTAL"
+            cell.font = Font(bold=True, size=11, color="FFFFFF")
+            cell.fill = PatternFill(start_color="2c3e50", end_color="2c3e50", fill_type="solid")
+            cell.alignment = Alignment(horizontal="left", vertical="center")
             
-            # Unknown cameras section
-            if unknown_cams:
-                current_row = add_section_header(current_row, "⚠️ UNKNOWN STATUS", "f39c12", len(unknown_cams))
-                for cam in unknown_cams:
-                    add_camera_row(cam, current_row, 'unknown')
-                    current_row += 1
-                current_row += 1  # Add spacing
+            cell = summary_ws.cell(row=row_num, column=2)
+            cell.value = total_cameras
+            cell.font = Font(bold=True, size=11, color="FFFFFF")
+            cell.fill = PatternFill(start_color="2c3e50", end_color="2c3e50", fill_type="solid")
+            cell.alignment = Alignment(horizontal="center", vertical="center")
             
-            # Summary statistics section with rich design
-            current_row += 1
-            ws.merge_cells(f'A{current_row}:I{current_row}')
-            summary_header = ws[f'A{current_row}']
-            summary_header.value = "📊 SUMMARY STATISTICS"
-            summary_header.font = Font(bold=True, size=12, color="FFFFFF", name='Calibri')
-            summary_header.fill = PatternFill(start_color="34495e", end_color="34495e", fill_type="solid")
-            summary_header.alignment = Alignment(horizontal="center", vertical="center")
-            ws.row_dimensions[current_row].height = 25
-            current_row += 1
+            cell = summary_ws.cell(row=row_num, column=3)
+            cell.value = total_online
+            cell.font = Font(bold=True, size=11, color="FFFFFF")
+            cell.fill = PatternFill(start_color="27ae60", end_color="27ae60", fill_type="solid")
+            cell.alignment = Alignment(horizontal="center", vertical="center")
             
-            # Statistics with visual indicators
-            total_count = len(camera_source)
-            online_count = len(online_cams)
-            offline_count = len(offline_cams)
-            unknown_count = len(unknown_cams)
-            online_percentage = (online_count / total_count * 100) if total_count > 0 else 0
+            cell = summary_ws.cell(row=row_num, column=4)
+            cell.value = total_offline
+            cell.font = Font(bold=True, size=11, color="FFFFFF")
+            cell.fill = PatternFill(start_color="c0392b", end_color="c0392b", fill_type="solid")
+            cell.alignment = Alignment(horizontal="center", vertical="center")
             
-            # Create statistics boxes
-            stats_data = [
-                ("📷 Total Cameras", str(total_count), "3498db"),
-                ("✅ Online", str(online_count), "27ae60"),
-                ("❌ Offline", str(offline_count), "e74c3c"),
-                ("⚠️ Unknown", str(unknown_count), "f39c12"),
-                ("📈 Uptime Rate", f"{online_percentage:.1f}%", "16a085")
-            ]
+            cell = summary_ws.cell(row=row_num, column=5)
+            cell.value = total_unknown
+            cell.font = Font(bold=True, size=11, color="FFFFFF")
+            cell.fill = PatternFill(start_color="d68910", end_color="d68910", fill_type="solid")
+            cell.alignment = Alignment(horizontal="center", vertical="center")
             
-            stat_col = 1
-            for label, value, color in stats_data:
-                # Label cell
-                label_cell = ws.cell(row=current_row, column=stat_col)
-                label_cell.value = label
-                label_cell.font = Font(bold=True, size=10, color="FFFFFF", name='Calibri')
-                label_cell.fill = PatternFill(start_color=color, end_color=color, fill_type="solid")
-                label_cell.alignment = Alignment(horizontal="center", vertical="center")
-                label_cell.border = Border(
+            cell = summary_ws.cell(row=row_num, column=6)
+            cell.value = f"{total_uptime:.1f}%"
+            cell.font = Font(bold=True, size=11, color="FFFFFF")
+            cell.fill = PatternFill(start_color="16a085", end_color="16a085", fill_type="solid")
+            cell.alignment = Alignment(horizontal="center", vertical="center")
+            
+            for col in range(1, 7):
+                summary_ws.cell(row=row_num, column=col).border = Border(
                     left=Side(style='medium', color='000000'),
                     right=Side(style='medium', color='000000'),
                     top=Side(style='medium', color='000000'),
                     bottom=Side(style='medium', color='000000')
                 )
+            
+            summary_ws.row_dimensions[row_num].height = 25
+            
+            # Column widths for summary
+            summary_ws.column_dimensions['A'].width = 25
+            summary_ws.column_dimensions['B'].width = 15
+            summary_ws.column_dimensions['C'].width = 12
+            summary_ws.column_dimensions['D'].width = 12
+            summary_ws.column_dimensions['E'].width = 12
+            summary_ws.column_dimensions['F'].width = 12
+            
+            # ========== CREATE NVR SHEETS ==========
+            def create_nvr_sheet(nvr_name, cameras):
+                """Create individual sheet for each NVR"""
+                # Sanitize sheet name (Excel limits to 31 chars and no special chars)
+                safe_name = nvr_name[:28].replace('/', '-').replace('\\', '-').replace('*', '').replace('?', '').replace(':', '').replace('[', '').replace(']', '')
+                ws = wb.create_sheet(safe_name)
                 
-                # Value cell
-                value_cell = ws.cell(row=current_row + 1, column=stat_col)
-                value_cell.value = value
-                value_cell.font = Font(bold=True, size=16, color=color, name='Calibri')
-                value_cell.alignment = Alignment(horizontal="center", vertical="center")
-                value_cell.border = Border(
-                    left=Side(style='medium', color='000000'),
-                    right=Side(style='medium', color='000000'),
-                    bottom=Side(style='medium', color='000000')
-                )
+                # Header
+                ws.merge_cells('A1:I1')
+                header = ws['A1']
+                header.value = f"📡 {nvr_name} - Camera Details"
+                header.font = Font(size=14, bold=True, color="FFFFFF")
+                header.fill = PatternFill(start_color="2874a6", end_color="2874a6", fill_type="solid")
+                header.alignment = Alignment(horizontal="center", vertical="center")
+                ws.row_dimensions[1].height = 30
                 
-                stat_col += 1
-                if stat_col > 5:
-                    break
+                # Stats
+                nvr_online = sum(1 for c in cameras if 'online' in str(c.get('status', '')).lower())
+                nvr_offline = len(cameras) - nvr_online
+                
+                ws.merge_cells('A2:I2')
+                stats = ws['A2']
+                stats.value = f"📊 Total: {len(cameras)} | ✅ Online: {nvr_online} | ❌ Offline: {nvr_offline}"
+                stats.font = Font(size=10, bold=True, color="34495e")
+                stats.fill = PatternFill(start_color="d6eaf8", end_color="d6eaf8", fill_type="solid")
+                stats.alignment = Alignment(horizontal="center", vertical="center")
+                ws.row_dimensions[2].height = 22
+                
+                # Column headers
+                headers = [("🚦", "Status"), ("📷", "Camera Name"), ("🌐", "IP Address"), 
+                          ("🔧", "Model"), ("🔌", "Port"), ("🕒", "Last Updated"), 
+                          ("📊", "Connection"), ("📝", "Remark"), ("🔍", "Details")]
+                
+                for col, (icon, header_text) in enumerate(headers, 1):
+                    cell = ws.cell(row=4, column=col)
+                    cell.value = f"{icon}\n{header_text}"
+                    cell.font = Font(bold=True, color="FFFFFF", size=10)
+                    cell.fill = PatternFill(start_color="34495e", end_color="34495e", fill_type="solid")
+                    cell.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
+                    cell.border = Border(left=Side(style='medium'), right=Side(style='medium'),
+                                       top=Side(style='medium'), bottom=Side(style='medium'))
+                ws.row_dimensions[4].height = 32
+                
+                # Camera rows
+                row = 5
+                for cam in sorted(cameras, key=lambda x: x.get('name', '')):
+                    status = str(cam.get('status', '')).lower()
+                    is_online = 'online' in status
+                    
+                    # Status
+                    cell = ws.cell(row=row, column=1)
+                    cell.value = "✅" if is_online else "❌"
+                    cell.font = Font(size=14)
+                    cell.fill = PatternFill(start_color="d5f4e6" if is_online else "fadbd8", 
+                                          end_color="d5f4e6" if is_online else "fadbd8", fill_type="solid")
+                    cell.alignment = Alignment(horizontal="center", vertical="center")
+                    
+                    # Name
+                    cell = ws.cell(row=row, column=2)
+                    cell.value = cam.get('name', '')
+                    cell.font = Font(bold=True, size=10)
+                    cell.alignment = Alignment(horizontal="left", vertical="center")
+                    
+                    # IP
+                    cell = ws.cell(row=row, column=3)
+                    cell.value = cam.get('ip', '')
+                    cell.font = Font(size=10, name='Courier New', color="154360")
+                    cell.alignment = Alignment(horizontal="center", vertical="center")
+                    
+                    # Model
+                    cell = ws.cell(row=row, column=4)
+                    cell.value = cam.get('model', '')
+                    cell.font = Font(size=9, color="566573")
+                    cell.alignment = Alignment(horizontal="left", vertical="center")
+                    
+                    # Port
+                    cell = ws.cell(row=row, column=5)
+                    cell.value = str(cam.get('port', ''))
+                    cell.font = Font(size=10)
+                    cell.alignment = Alignment(horizontal="center", vertical="center")
+                    
+                    # Last Updated
+                    cell = ws.cell(row=row, column=6)
+                    cell.value = cam.get('last_updated', '')
+                    cell.font = Font(size=9, italic=True)
+                    cell.alignment = Alignment(horizontal="center", vertical="center")
+                    
+                    # Connection
+                    cell = ws.cell(row=row, column=7)
+                    conn = cam.get('connection_type', 'Standard')
+                    cell.value = conn.replace('_', ' ').title()
+                    cell.font = Font(size=9, color="16a085" if 'digest' in conn.lower() else "7f8c8d")
+                    cell.alignment = Alignment(horizontal="center", vertical="center")
+                    
+                    # Remark
+                    cell = ws.cell(row=row, column=8)
+                    cell.value = cam.get('remark', '')
+                    cell.font = Font(size=9, color="7f8c8d", italic=True)
+                    cell.alignment = Alignment(horizontal="left", vertical="center")
+                    
+                    # Details
+                    cell = ws.cell(row=row, column=9)
+                    cell.value = f"Ch {cam.get('channel', 'N/A')}"
+                    cell.font = Font(size=9)
+                    cell.alignment = Alignment(horizontal="center", vertical="center")
+                    
+                    # Borders and alternating colors
+                    border = Border(left=Side(style='thin', color='bdc3c7'),
+                                  right=Side(style='thin', color='bdc3c7'),
+                                  top=Side(style='thin', color='bdc3c7'),
+                                  bottom=Side(style='thin', color='bdc3c7'))
+                    
+                    for col in range(1, 10):
+                        ws.cell(row=row, column=col).border = border
+                        if col != 1 and row % 2 == 0:
+                            ws.cell(row=row, column=col).fill = PatternFill(
+                                start_color="f8f9fa", end_color="f8f9fa", fill_type="solid"
+                            )
+                    
+                    ws.row_dimensions[row].height = 20
+                    row += 1
+                
+                # Column widths
+                ws.column_dimensions['A'].width = 10
+                ws.column_dimensions['B'].width = 28
+                ws.column_dimensions['C'].width = 16
+                ws.column_dimensions['D'].width = 22
+                ws.column_dimensions['E'].width = 8
+                ws.column_dimensions['F'].width = 18
+                ws.column_dimensions['G'].width = 14
+                ws.column_dimensions['H'].width = 20
+                ws.column_dimensions['I'].width = 10
+                
+                # Freeze panes
+                ws.freeze_panes = 'A5'
             
-            ws.row_dimensions[current_row].height = 22
-            ws.row_dimensions[current_row + 1].height = 30
-            current_row += 3
+            # Create a sheet for each NVR
+            for nvr_name in sorted(nvr_groups.keys()):
+                create_nvr_sheet(nvr_name, nvr_groups[nvr_name])
             
-            # Footer with branding
-            ws.merge_cells(f'A{current_row}:I{current_row}')
-            footer_cell = ws[f'A{current_row}']
-            footer_cell.value = f"Report generated by {APP_TITLE} v{APP_VERSION} - Professional Camera Monitoring Solution"
-            footer_cell.font = Font(size=9, italic=True, color="95a5a6", name='Calibri')
-            footer_cell.fill = PatternFill(start_color="ecf0f1", end_color="ecf0f1", fill_type="solid")
-            footer_cell.alignment = Alignment(horizontal="center", vertical="center")
-            ws.row_dimensions[current_row].height = 20
-            
-            # Auto-adjust column widths for optimal display
-            column_widths = {
-                'A': 15,  # Status
-                'B': 25,  # Camera Name
-                'C': 16,  # IP Address
-                'D': 12,  # NVR
-                'E': 20,  # Model
-                'F': 8,   # Port
-                'G': 18,  # Last Updated
-                'H': 15,  # Connection
-                'I': 20   # Remark
-            }
-            
-            for col_letter, width in column_widths.items():
-                ws.column_dimensions[col_letter].width = width
-            
+            # Save workbook
             wb.save(filename)
+            
             QtWidgets.QMessageBox.information(
                 self, 
                 "Export Complete", 
-                f"✅ Professional Excel report with rich styling saved!\n\n📁 {filename}\n\n"
-                f"📊 {total_count} cameras | ✅ {online_count} online | ❌ {offline_count} offline"
+                f"✅ Professional Excel report with NVR-grouped sheets saved!\n\n"
+                f"📁 {filename}\n\n"
+                f"📊 {len(nvr_groups)} NVRs | {total_cameras} cameras\n"
+                f"✅ {total_online} online | ❌ {total_offline} offline\n\n"
+                f"📑 Includes Summary sheet + {len(nvr_groups)} NVR detail sheets"
             )
             
-        except ImportError:
-            QtWidgets.QMessageBox.critical(self, "Error", "openpyxl library not installed.\nRun: pip install openpyxl")
+        except ImportError as e:
+            QtWidgets.QMessageBox.critical(self, "Error", f"Required library not installed:\n{str(e)}\n\nRun: pip install openpyxl")
         except Exception as e:
             QtWidgets.QMessageBox.critical(self, "Export Error", f"Failed to export Excel:\n{str(e)}")
             import traceback
@@ -8074,12 +8462,6 @@ class CameraMonitor(QtWidgets.QMainWindow):
         # call show dialog in main thread
         QtCore.QTimer.singleShot(0, lambda: self._show_sadp_results_dialog(devices, origin_name))
 
-    def show_sadp_tool(self):
-        """Feature removed - SADP Tool functionality has been disabled."""
-        QtWidgets.QMessageBox.information(self, "Feature Removed", 
-            "The SADP Tool feature has been removed in this version.")
-        log("[REMOVED] SADP Tool feature accessed but disabled")
-
     def _update_monitor_table(self, table, devices, registry):
         """Update monitor table with current device status."""
         table.setRowCount(len(registry))
@@ -8779,9 +9161,10 @@ class CameraMonitor(QtWidgets.QMainWindow):
         header_layout.addWidget(title_label)
         layout.addLayout(header_layout)
         
-        # Version info
-        info_text = QtWidgets.QTextEdit()
+        # Version info with clickable links
+        info_text = QtWidgets.QTextBrowser()
         info_text.setReadOnly(True)
+        info_text.setOpenExternalLinks(True)
         
         about_content = f"""
 <h3>🚀 Enhanced Camera Monitoring System</h3>
@@ -8844,7 +9227,7 @@ class CameraMonitor(QtWidgets.QMainWindow):
 <p><b>Developed by:</b> Chhany<br>
 <b>Team:</b> NARONG CCTV KOH-KONG<br>
 <b>Company:</b> Sky-Tech<br>
-<b>For improvements:</b> Contact me on Telegram: <a href="https://t.me/chhanycls" style="color: #0088cc;">@chhanycls</a></p>
+<b>Telegram:</b> <a href="https://t.me/chhanycls" style="color: #0088cc; text-decoration: none; font-weight: bold;">@chhanycls</a> (Click to open)</p>
 
 <hr>
 <p style="text-align: center;"><i>🌟 Professional Camera Monitoring Made Simple 🌟</i></p>

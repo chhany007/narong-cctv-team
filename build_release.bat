@@ -1,6 +1,6 @@
 @echo off
 echo ========================================
-echo Building NARONG CCTV v8.7.0 Executable
+echo Building NARONG CCTV v8.8.0 Executable
 echo ========================================
 echo.
 
@@ -18,29 +18,29 @@ echo.
 echo Cleaning previous builds...
 if exist build rmdir /s /q build
 if exist dist rmdir /s /q dist
-if exist "NARONG_CCTV_v8.7.0.exe" del "NARONG_CCTV_v8.7.0.exe"
+if exist "NARONG_CCTV_v8.8.0.exe" del "NARONG_CCTV_v8.8.0.exe"
 
 REM Build executable
 echo.
 echo Building executable...
-pyinstaller --clean build_v8.7.0.spec
+pyinstaller --clean build_v8.8.0.spec
 
 REM Check if build successful
-if exist "dist\NARONG_CCTV_v8.7.0.exe" (
+if exist "dist\NARONG_CCTV_v8.8.0.exe" (
     echo.
     echo ========================================
     echo Build Successful!
     echo ========================================
     echo.
-    echo Executable location: dist\NARONG_CCTV_v8.7.0.exe
+    echo Executable location: dist\NARONG_CCTV_v8.8.0.exe
     echo Size: 
-    dir "dist\NARONG_CCTV_v8.7.0.exe" | find "NARONG_CCTV_v8.7.0.exe"
+    dir "dist\NARONG_CCTV_v8.8.0.exe" | find "NARONG_CCTV_v8.8.0.exe"
     echo.
     
     REM Copy to root directory
-    copy "dist\NARONG_CCTV_v8.7.0.exe" .
+    copy "dist\NARONG_CCTV_v8.8.0.exe" .
     echo.
-    echo Executable copied to: %CD%\NARONG_CCTV_v8.7.0.exe
+    echo Executable copied to: %CD%\NARONG_CCTV_v8.8.0.exe
     echo.
     echo ========================================
     echo Ready for Release!
