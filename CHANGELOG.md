@@ -1,158 +1,113 @@
-# Changelog - NARONG CCTV TEAM Camera Monitor
+# Changelog
 
-All notable changes to this project will be documented in this file.
+## Version 8.7.0 (2025-11-23)
 
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
-and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+### 🎉 Major Features
 
-## [Unreleased]
-### Planned Features
-- Silent auto-update option for IT administrators
-- Rollback to previous version
-- Delta updates (smaller downloads)
-- Update notifications via system tray
-- Multi-language support
+#### Professional Export System
+- **Excel Export** with rich styling and formatting
+  - Color-coded status sections (Online/Offline/Unknown)
+  - Professional headers with company branding
+  - Statistics boxes with visual indicators
+  - Grouped data by status
+  - Auto-adjusted columns and print-ready layout
+  - Summary section with uptime percentage
 
----
+- **Word Export** with professional formatting
+  - Company header and contact information
+  - Formatted tables with all camera data
+  - Summary statistics section
 
-## [8.0.0] - 2025-11-16
+- **PDF Export** with styled reports
+  - Professional layout with headers
+  - Color-coded status indicators
+  - Compact tables optimized for PDF
 
-### Added - Major Update System
-- ✨ **Automatic Update System**: App now checks for updates on startup
-- 🔄 **Manual Update Check**: New "Check for Updates" button in toolbar
-- 📥 **One-Click Updates**: Download and install updates with single click
-- 📝 **Release Notes Display**: See what's new before updating
-- 🔒 **Secure Downloads**: SHA256 checksum verification
-- ⏰ **Smart Checking**: Only checks once per day (not annoying)
-- ❌ **Skip Version**: Option to skip unwanted updates
-- 📊 **Progress Tracking**: Visual progress bar during download
+- **Export Dialog**
+  - Company name, telephone, and Telegram fields
+  - Logo file selection
+  - Settings saved between exports
+  - Format selection (Excel/Word/PDF)
 
-### Added - Other Features
-- 🚀 **Quick Workflow Wizard**: Automated setup wizard for initial configuration
-- 📹 **NVR Camera Fetching**: Automatically discover cameras from NVR
-- 🔧 **SADP Tool Integration**: Network discovery for Hikvision devices
-- 🔄 **NVR Status Refresh**: Check all NVR connectivity with one click
-- 📊 **Enhanced Logging**: Better error tracking and diagnostics
+#### SADP Device Discovery Tool
+- **Network Scanning** for Hikvision devices
+  - Configurable IP range and timeout
+  - Fast parallel scanning (50+ devices simultaneously)
+  - Real-time progress tracking
+  - Auto-detect cameras, NVRs, and DVRs
 
-### Changed
-- 🎨 Improved UI with better spacing and layout
-- ⚡ Faster parallel camera checking
-- 🔍 Enhanced SADP discovery with subnet targeting
-- 📊 Better NVR status indicators
-- 🔐 More secure credential storage
+- **Device Management**
+  - View complete device information (IP, MAC, model, firmware, serial)
+  - Configure network settings (IP, gateway, subnet, port)
+  - Password management interface
+  - Connection testing with response time
+  - Export scan results to CSV
 
-### Fixed
-- 🐛 Fixed NVR login on certain models
-- 🐛 Resolved camera list refresh issues
-- 🐛 Improved Excel sheet detection for non-standard formats
-- 🐛 Fixed timeout issues on slow networks
-- 🐛 Corrected IP detection for certain NVR models
+### ✨ Improvements
 
-### Technical
-- Added `update_manager.py` for update functionality
-- Added `version_config.json` for version tracking
-- Updated PyInstaller build spec to include update files
-- Enhanced error handling throughout application
+#### Offline Camera Verification
+- Auto-verify offline cameras with ping before showing popup
+- Parallel ping execution for speed
+- Updated status with verification results
+- Single-click navigation from popup to table
+- Blue highlight on selected items (better visibility)
 
----
+#### Camera Counting System
+- Fixed duplicate counting issues
+- Count ALL cameras including duplicates on different NVRs
+- Accurate offline camera counts
+- Display: Total, Unique IPs, and Duplicates
+- Popup count now matches counter display
 
-## [7.0.0] - 2025-11-01
+#### Camera Location
+- Enhanced camera navigation from offline popup
+- Handles duplicate IPs across different NVRs correctly
+- Auto-switches to "All cameras" view
+- Accurate row highlighting and scrolling
 
-### Added
-- 📷 Camera status checking (TCP, HTTP, RTSP, Ping)
-- 🗄️ NVR sidebar with overview
-- 🔐 Credential manager with keyring support
-- 📤 Export to CSV functionality
-- 🎦 VLC integration for RTSP streams
-- 🌐 Browser integration for HTTP access
-- 🔍 Search and filter cameras
-- 📊 Device type and model detection
+### 🔧 Technical Changes
 
-### Changed
-- Redesigned main interface
-- Improved Excel file handling
-- Better error messages
+- **Removed Features**
+  - Quick Sync Workflow (replaced with SADP)
+  - Performance Dashboard (replaced with SADP)
 
----
+- **Dependencies Added**
+  - `python-docx>=0.8.11` for Word exports
+  - `reportlab>=3.6.0` for PDF exports
 
-## Version Numbering
+- **Code Cleanup**
+  - Removed unnecessary documentation files
+  - Removed debug files and test scripts
+  - Cleaned Python cache directories
 
-### Format: MAJOR.MINOR.PATCH
+### 📝 Updates
 
-- **MAJOR**: Breaking changes or significant new features
-  - Example: 7.0.0 → 8.0.0 (added update system)
-  
-- **MINOR**: New features, backwards compatible
-  - Example: 8.0.0 → 8.1.0 (new feature added)
-  
-- **PATCH**: Bug fixes only
-  - Example: 8.0.0 → 8.0.1 (bug fixed)
+- **About Dialog**
+  - Updated developer info: Chhany
+  - Team: NARONG CCTV KOH-KONG
+  - Company: Sky-Tech
+  - Clickable Telegram contact: @chhanycls
 
----
+- **Application Info**
+  - Version: 8.7.0
+  - Build Date: 2025-11-23
+  - App ID: SkyTech.CameraMonitor.8.7.0
 
-## How to Add Entries
+### 🐛 Bug Fixes
 
-When releasing a new version:
-
-1. **Update Version Number** in `version_config.json`
-2. **Add Entry** to this file under [Unreleased] first
-3. **Move to Versioned Section** when releasing
-4. **Update version.json** on server with same notes
-
-### Categories:
-- **Added**: New features
-- **Changed**: Changes to existing features
-- **Deprecated**: Features being removed soon
-- **Removed**: Features removed
-- **Fixed**: Bug fixes
-- **Security**: Security improvements
-
-### Example Entry:
-```markdown
-## [8.1.0] - 2025-12-01
-
-### Added
-- ✨ New camera auto-discovery feature
-- 📊 Real-time bandwidth monitoring
-
-### Fixed
-- 🐛 Fixed crash when NVR offline
-- 🐛 Resolved memory leak in status checker
-
-### Changed
-- ⚡ Improved startup speed by 50%
-```
+- Fixed status icon detection for verified cameras
+- Fixed counter not updating after verification
+- Fixed duplicate IP filtering logic
+- Fixed camera location navigation issues
+- Fixed datetime import in SADP export
 
 ---
 
-## Release Checklist
+## Version 8.6.1 (2025-11-22)
 
-Before releasing a new version:
-
-- [ ] Update version in `version_config.json`
-- [ ] Update this CHANGELOG.md
-- [ ] Build new exe: `.\build_complete.bat`
-- [ ] Calculate checksum: `Get-FileHash`
-- [ ] Test the exe thoroughly
-- [ ] Upload exe to hosting (GitHub/Server)
-- [ ] Update `version.json` on server:
-  - [ ] Version number
-  - [ ] Download URL
-  - [ ] Checksum
-  - [ ] Release notes
-  - [ ] File size
-  - [ ] Release date
-- [ ] Test update process
-- [ ] Announce to users
-
----
-
-## Links
-
-- [GitHub Repository](https://github.com/your-username/camera-monitor)
-- [Issue Tracker](https://github.com/your-username/camera-monitor/issues)
-- [Documentation](UPDATE_SYSTEM_SETUP.md)
-
----
-
-**Note**: Dates are in YYYY-MM-DD format
+### Previous Features
+- Smart Caching System
+- Performance Dashboard
+- Enhanced Error Handling
+- Optimized Parallel Processing
+- Advanced Metrics Tracking

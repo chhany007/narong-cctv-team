@@ -1,0 +1,176 @@
+{
+  "nvrs": [
+    {
+      "name": "192.168.2.166",
+      "ip": "192.168.2.166",
+      "username": "admin",
+      "port": 80,
+      "protocol": "http",
+      "model": "",
+      "added": "2025-11-20T08:14:50.163698"
+    },
+    {
+      "name": "NVR1",
+      "ip": "192.168.2.168",
+      "username": "admin",
+      "port": 80,
+      "protocol": "http",
+      "model": "",
+      "added": "2025-11-20 10:22:20"
+    },
+    {
+      "name": "NVR2",
+      "ip": "192.168.2.169",
+      "username": "admin",
+      "port": 80,
+      "protocol": "http",
+      "model": "",
+      "added": "2025-11-20 10:22:20"
+    },
+    {
+      "name": "NVR3",
+      "ip": "192.168.2.170",
+      "username": "admin",
+      "port": 80,
+      "protocol": "http",
+      "model": "",
+      "added": "2025-11-20 10:22:20"
+    },
+    {
+      "name": "NVR4",
+      "ip": "192.168.2.171",
+      "username": "admin",
+      "port": 80,
+      "protocol": "http",
+      "model": "",
+      "added": "2025-11-20 10:22:20"
+    },
+    {
+      "name": "NVR5",
+      "ip": "192.168.2.172",
+      "username": "admin",
+      "port": 80,
+      "protocol": "http",
+      "model": "",
+      "added": "2025-11-20 10:22:20"
+    },
+    {
+      "name": "NVR6",
+      "ip": "192.168.2.173",
+      "username": "admin",
+      "port": 80,
+      "protocol": "http",
+      "model": "",
+      "added": "2025-11-20 10:22:20"
+    },
+    {
+      "name": "NVR7",
+      "ip": "192.168.2.177",
+      "username": "admin",
+      "port": 80,
+      "protocol": "http",
+      "model": "",
+      "added": "2025-11-20 10:22:20"
+    },
+    {
+      "name": "NVR8",
+      "ip": "192.168.3.1",
+      "username": "admin",
+      "port": 80,
+      "protocol": "http",
+      "model": "",
+      "added": "2025-11-20 10:22:20"
+    },
+    {
+      "name": "NVR9",
+      "ip": "192.168.3.2",
+      "username": "admin",
+      "port": 80,
+      "protocol": "http",
+      "model": "",
+      "added": "2025-11-20 10:22:20"
+    },
+    {
+      "name": "NVR10",
+      "ip": "192.168.3.3",
+      "username": "admin",
+      "port": 80,
+      "protocol": "http",
+      "model": "",
+      "added": "2025-11-20 10:22:20"
+    },
+    {
+      "name": "NVR11",
+      "ip": "192.168.3.4",
+      "username": "admin",
+      "port": 80,
+      "protocol": "http",
+      "model": "",
+      "added": "2025-11-20 10:22:20"
+    },
+    {
+      "name": "NVR12",
+      "ip": "192.168.3.5",
+      "username": "admin",
+      "port": 80,
+      "protocol": "http",
+      "model": "",
+      "added": "2025-11-20 10:22:20"
+    },
+    {
+      "name": "NVR13",
+      "ip": "192.168.2.247",
+      "username": "admin",
+      "port": 80,
+      "protocol": "http",
+      "model": "",
+      "added": "2025-11-20 10:22:20"
+    },
+    {
+      "name": "NVR14",
+      "ip": "192.168.2.178",
+      "username": "admin",
+      "port": 80,
+      "protocol": "http",
+      "model": "",
+      "added": "2025-11-20 10:22:20"
+    },
+    {
+      "name": "NVR15",
+      "ip": "192.168.2.248",
+      "username": "admin",
+      "port": 80,
+      "protocol": "http",
+      "model": "",
+      "added": "2025-11-20 10:22:20"
+    },
+    {
+      "name": "NVR16",
+      "ip": "192.168.2.245",
+      "username": "admin",
+      "port": 80,
+      "protocol": "http",
+      "model": "",
+      "added": "2025-11-20 10:22:20"
+    },
+    {
+      "name": "NVR18",
+      "ip": "192.168.2.167",
+      "username": "admin",
+      "port": 80,
+      "protocol": "http",
+      "model": "",
+      "added": "2025-11-20 10:22:20"
+    },
+    {
+      "name": "DI Sreen",
+      "ip": "192.168.3.7",
+      "username": "admin",
+      "port": 80,
+      "protocol": "http",
+      "model": "",
+      "added": "2025-11-20 10:22:20"
+    }
+  ],
+  "last_updated": "2025-11-20T10:22:20.090022"
+}

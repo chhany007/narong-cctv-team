@@ -4,3 +4,5 @@ openpyxl>=3.0.0
 requests>=2.26.0
 keyring>=23.0.0
 pyinstaller>=6.0.0
+python-docx>=0.8.11
+reportlab>=3.6.0

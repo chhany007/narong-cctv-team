@@ -42,8 +42,26 @@ last_update_check.json
 update_cache.json
 sadp_registry.json
 
+# Debug and temporary files
+debug_*.xml
+camera_response_*.xml
+*_temp.xml
+
+# Documentation and summary files (auto-generated)
+*_SUMMARY*.md
+*_ANALYSIS*.md
+*ENHANCEMENT*.md
+*STATUS*.md
+AUTO_CLOSE_FIX.md
+QUICK_SYNC*.md
+CLEANUP_*.md
+
 # Exported files
 exported_cameras.csv
+
+# Version files (auto-generated)
+version.json
+version_config.json
 
 # IDE
 .vscode/

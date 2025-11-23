@@ -1,14 +1,22 @@
-# 🎥 NARONG CCTV TEAM - Camera Monitor
+# 🎥 NARONG CCTV v8.6 - Advanced Camera Monitoring System
 
-Professional camera monitoring and management system for NVR and IP cameras.
+Professional camera monitoring and management system for NVR and IP cameras with enhanced parallel processing and duplicate detection.
 
-![Version](https://img.shields.io/badge/version-8.0.0-blue)
+![Version](https://img.shields.io/badge/version-8.6-blue)
 ![Platform](https://img.shields.io/badge/platform-Windows-lightgrey)
 ![License](https://img.shields.io/badge/license-Proprietary-red)
 
 ---
 
 ## ✨ Features
+
+### 🆕 New in v8.6
+- 🔍 **Advanced Duplicate Detection** - Smart duplicate camera identification across all sources
+- ⚡ **Enhanced Parallel Processing** - Optimized multi-threading with configurable worker pools (6 workers by default)
+- 📊 **Performance Optimization** - Improved connection timeouts and UI throttling
+- 🎨 **Enhanced Visual Feedback** - Better status indicators and real-time progress tracking
+- 🛠️ **Improved Error Handling** - Comprehensive logging with multiple severity levels
+- 🚀 **Workflow Wizard v8.6** - Upgraded automated camera discovery process
 
 ### 🎯 Core Features
 - 📹 **NVR Management** - Monitor multiple NVR systems
