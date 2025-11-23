@@ -1,5 +1,12 @@
 # 🔑 Master Key Generator
 
+⚠️ **ADMINISTRATOR USE ONLY** ⚠️
+
+This tool is for administrators to generate license keys for NARONG CCTV users.  
+**DO NOT distribute this tool publicly or include it in releases.**
+
+---
+
 ## Overview
 Standalone application for administrators to generate license keys for NARONG CCTV Monitor users.
 

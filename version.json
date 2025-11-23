@@ -1,0 +1,9 @@
+{
+  "version": "8.8.0",
+  "download_url": "https://github.com/chhany007/narong-cctv-team/releases/download/v8.8.0/NARONG_CCTV_v8.8.0.exe",
+  "release_notes": "Version 8.8.0 - Excel NVR Grouping & License Fixes\n\n✨ Major Features:\n\n📊 Excel Export with NVR Grouping\n- Summary sheet with camera counts per NVR\n- Individual NVR sheets with full camera details\n- Professional blue theme styling\n- Enhanced column widths and formatting\n\n🔑 License System Fixes\n- Fixed validation algorithm (signature mismatch resolved)\n- Abbreviated type signatures (PRO/ENT/TRI/DEM)\n- Machine-bound secure license keys\n\n🎨 Master Key Generator Redesign\n- Modern card-based layout\n- Removed header/info banners for cleaner UI\n- Enhanced vertical organization with icons\n- Larger generate button, better UX\n\n🛠️ SADP Tool Restoration\n- Fully functional device discovery\n- Complete configuration capabilities\n- Fixed duplicate stub error\n\n🐛 Bug Fixes:\n- Fixed license validation signature mismatch\n- Fixed SADP tool access error\n- Improved Excel export reliability\n- Enhanced UI responsiveness\n\n📈 Performance:\n- Optimized parallel processing\n- Faster camera verification\n- Improved memory management\n\nContact administrator for license activation.",
+  "release_date": "2025-11-23",
+  "file_size": 119535104,
+  "required": false,
+  "portable": true
+}

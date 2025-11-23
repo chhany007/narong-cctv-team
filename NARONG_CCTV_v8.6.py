@@ -2462,10 +2462,9 @@ class CameraMonitor(QtWidgets.QMainWindow):
         except Exception:
             self.check_history = {}
         
-        # Auto-update disabled to prevent app closure on startup
-        # Users can manually check for updates via menu
-        # if UPDATE_MANAGER_AVAILABLE:
-        #     QtCore.QTimer.singleShot(2000, self.check_for_updates_startup)
+        # Auto-update check on startup (non-intrusive, background check)
+        if UPDATE_MANAGER_AVAILABLE:
+            QtCore.QTimer.singleShot(2000, self.check_for_updates_startup)
 
     # ---------------- data load ----------------
     def load_data(self, initial=False):

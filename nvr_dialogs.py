@@ -61,11 +61,6 @@ class AddNVRDialog(QDialog):
         self.password_edit.setPlaceholderText("Enter password")
         form_layout.addRow("🔑 Password:", self.password_edit)
         
-        # Show password checkbox
-        self.show_password_cb = QCheckBox("Show password")
-        self.show_password_cb.toggled.connect(self.toggle_password_visibility)
-        form_layout.addRow("", self.show_password_cb)
-        
         layout.addLayout(form_layout)
         
         # Test connection button
@@ -132,13 +127,6 @@ class AddNVRDialog(QDialog):
         
         self.setLayout(layout)
         
-    def toggle_password_visibility(self, show):
-        """Toggle password visibility"""
-        if show:
-            self.password_edit.setEchoMode(QLineEdit.Normal)
-        else:
-            self.password_edit.setEchoMode(QLineEdit.Password)
-            
     def test_connection(self):
         """Test NVR connection"""
         if not self.validate_input():
