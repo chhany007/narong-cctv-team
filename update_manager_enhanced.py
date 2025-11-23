@@ -11,6 +11,7 @@ import subprocess
 import time
 import hashlib
 import shutil
+import zipfile
 import winreg
 from pathlib import Path
 from PyQt5 import QtCore, QtWidgets, QtGui
@@ -215,18 +216,60 @@ class UpdateChecker:
             return False
     
     def install_update(self, installer_path):
-        """Launch installer/updater and exit current application"""
+        """Install or apply update depending on mode and file type.
+        - Installed mode: launch installer with silent update flags.
+        - Portable mode: if zip archive, extract over install path; else launch downloaded binary.
+        """
         try:
             if self.is_installed_mode():
-                # Run installer with admin privileges
                 subprocess.Popen([installer_path, '/SILENT', '/UPDATE'], shell=True)
+                return True, None
+            # Portable mode
+            install_path = self.get_install_path()
+            if installer_path.lower().endswith('.zip'):
+                try:
+                    with zipfile.ZipFile(installer_path, 'r') as zf:
+                        # Extract to a temp folder first
+                        temp_extract = os.path.join(os.path.dirname(installer_path), f"narong_update_{int(time.time())}")
+                        os.makedirs(temp_extract, exist_ok=True)
+                        zf.extractall(temp_extract)
+                        # Copy over files into install path
+                        for root, dirs, files in os.walk(temp_extract):
+                            rel = os.path.relpath(root, temp_extract)
+                            dest_dir = os.path.join(install_path, rel) if rel != '.' else install_path
+                            os.makedirs(dest_dir, exist_ok=True)
+                            for f in files:
+                                src_f = os.path.join(root, f)
+                                dst_f = os.path.join(dest_dir, f)
+                                # Ensure file is writable
+                                try:
+                                    if os.path.exists(dst_f):
+                                        os.chmod(dst_f, 0o666)
+                                except Exception:
+                                    pass
+                                shutil.copy2(src_f, dst_f)
+                        shutil.rmtree(temp_extract, ignore_errors=True)
+                    # Update current_version if available in package
+                    try:
+                        cfg = self.load_config()
+                        # Best effort: derive version from filename
+                        import re
+                        m = re.search(r"Update_(\d+\.\d+(?:\.\d+)?)", os.path.basename(installer_path))
+                        if m:
+                            cfg['current_version'] = m.group(1)
+                            self.config = cfg
+                            self.save_config()
+                    except Exception:
+                        pass
+                    return True, None
+                except Exception as e:
+                    return False, f"Portable update failed: {e}"
             else:
-                # Portable mode - just run the new exe
+                # Fallback: just run the downloaded updater (exe)
                 subprocess.Popen([installer_path], shell=True)
-            
-            return True, None
+                return True, None
         except Exception as e:
-            return False, f"Failed to launch installer: {str(e)}"
+            return False, f"Failed to apply update: {str(e)}"
     
     def create_uninstaller(self):
         """Create uninstaller entry in Windows"""
@@ -499,4 +542,28 @@ def check_for_updates_async(parent_widget=None, show_no_update=False):
     
     check_thread = CheckThread(checker)
     check_thread.result.connect(on_check_complete)
+
+    # Ensure thread is not garbage-collected before finishing
+    # Attach to parent widget (or module-level list) and clean up on finish.
+    storage_target = parent_widget if parent_widget is not None else checker
+    attr_name = '_active_update_threads'
+    existing = getattr(storage_target, attr_name, None)
+    if existing is None:
+        setattr(storage_target, attr_name, [])
+        existing = getattr(storage_target, attr_name)
+    existing.append(check_thread)
+
+    def _cleanup_thread():
+        try:
+            lst = getattr(storage_target, attr_name, [])
+            if check_thread in lst:
+                lst.remove(check_thread)
+        except Exception:
+            pass
+        check_thread.deleteLater()
+
+    check_thread.finished.connect(_cleanup_thread)
+    # Give the thread a parent (if possible) so Qt manages lifetime safely
+    if parent_widget is not None:
+        check_thread.setParent(parent_widget)
     check_thread.start()

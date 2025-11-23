@@ -1,4 +1,4 @@
-# 🎥 NARONG CCTV v8.6 - Advanced Camera Monitoring System
+# 🎥 NARONG CCTV v8.7 - Advanced Camera Monitoring System
 
 Professional camera monitoring and management system for NVR and IP cameras with enhanced parallel processing and duplicate detection.
 
@@ -10,13 +10,13 @@ Professional camera monitoring and management system for NVR and IP cameras with
 
 ## ✨ Features
 
-### 🆕 New in v8.6
+### 🆕 New in v8.7
 - 🔍 **Advanced Duplicate Detection** - Smart duplicate camera identification across all sources
 - ⚡ **Enhanced Parallel Processing** - Optimized multi-threading with configurable worker pools (6 workers by default)
 - 📊 **Performance Optimization** - Improved connection timeouts and UI throttling
 - 🎨 **Enhanced Visual Feedback** - Better status indicators and real-time progress tracking
 - 🛠️ **Improved Error Handling** - Comprehensive logging with multiple severity levels
-- 🚀 **Workflow Wizard v8.6** - Upgraded automated camera discovery process
+- 🚀 **Workflow Wizard v8.7** - Upgraded automated camera discovery process
 
 ### 🎯 Core Features
 - 📹 **NVR Management** - Monitor multiple NVR systems

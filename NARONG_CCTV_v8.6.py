@@ -1,6 +1,6 @@
-# NARONG_CCTV_v8.6.py
+# NARONG_CCTV v8.7
 """
-NARONG CCTV TEAM - Camera Monitor v8.6
+NARONG CCTV TEAM - Camera Monitor v8.7
 ========================================
 Advanced Camera Monitoring and NVR Management System
 
@@ -14,7 +14,7 @@ Advanced Camera Monitoring and NVR Management System
 - 🔄 Automatic update system with GitHub integration
 - 📊 Real-time status monitoring and export capabilities
 
-🚀 NEW IN v8.6:
+🚀 NEW IN v8.7:
 - Improved code organization and performance optimization
 - Enhanced error handling and user feedback
 - Centralized configuration management
@@ -406,10 +406,10 @@ class WorkingNVRController:
 
 # ==================== APPLICATION CONFIGURATION ====================
 # Version and metadata - Enhanced Edition
-APP_VERSION = "8.8.0"
+APP_VERSION = "8.7"
 APP_TITLE = "NARONG CCTV Monitor"
 APP_COMPANY = "Sky-Tech"
-APP_ID = "SkyTech.CameraMonitor.8.8.0"
+APP_ID = "SkyTech.CameraMonitor.8.7"
 BUILD_DATE = "2025-11-23"
 
 # License configuration
@@ -1703,9 +1703,10 @@ def get_machine_id():
 
 def generate_license_key(machine_id, expiry_date, license_type="PROFESSIONAL"):
     """Generate license key with machine binding and expiration"""
-    data = f"{machine_id}|{expiry_date.strftime('%Y-%m-%d')}|{license_type}"
+    key_type = license_type[:3].upper()
+    data = f"{machine_id}|{expiry_date.strftime('%Y-%m-%d')}|{key_type}"
     signature = hashlib.sha256((data + LICENSE_SALT.decode('latin-1')).encode()).hexdigest()
-    key = f"{machine_id}-{expiry_date.strftime('%Y%m%d')}-{license_type[:3].upper()}-{signature[:8].upper()}"
+    key = f"{machine_id}-{expiry_date.strftime('%Y%m%d')}-{key_type}-{signature[:8].upper()}"
     return key
 
 def validate_license_key(license_key, machine_id):
@@ -2172,7 +2173,7 @@ class CameraMonitor(QtWidgets.QMainWindow):
         self.offline_dialog = None  # Track active offline-camera popup
         self.camera_check_progress = {}
         
-        # Enhanced caching system for v8.6+
+        # Enhanced caching system for v8.7+
         self.connection_cache = {}  # Cache for connection status: ip -> {status, timestamp}
         self.nvr_cache = {}  # Cache for NVR responses: nvr_ip -> {cameras, timestamp}
         self.performance_metrics = {  # Track performance metrics
@@ -2191,15 +2192,22 @@ class CameraMonitor(QtWidgets.QMainWindow):
         self.ui_status_update_signal.connect(self._handle_ui_status_update)
         self.ui_call_signal.connect(self._execute_ui_callable)
         
-        # Connect enhanced v8.6+ signals
+        # Connect enhanced v8.7+ signals
         self.error_notification_signal.connect(self._handle_error_notification)
         self.performance_update_signal.connect(self._handle_performance_update)
         self.cache_stats_signal.connect(self._handle_cache_stats)
 
-        # Set window icon if logo exists
+        # Set window icon if logo exists (build multi-size icon for taskbar)
         logo_path = self.get_resource_path(LOGO_FILE)
         if os.path.exists(logo_path):
-            app_icon = QtGui.QIcon(logo_path)
+            app_icon = QtGui.QIcon()
+            try:
+                base_pix = QtGui.QPixmap(logo_path)
+                for size in (16, 20, 24, 32, 40, 48, 64, 128, 256):
+                    if not base_pix.isNull():
+                        app_icon.addPixmap(base_pix.scaled(size, size, QtCore.Qt.KeepAspectRatio, QtCore.Qt.SmoothTransformation))
+            except Exception:
+                app_icon = QtGui.QIcon(logo_path)
             self.setWindowIcon(app_icon)
             # Also set application-wide icon for taskbar
             QtWidgets.QApplication.setWindowIcon(app_icon)
@@ -2232,9 +2240,9 @@ class CameraMonitor(QtWidgets.QMainWindow):
         self.btn_export = QtWidgets.QPushButton("💾 Export Report"); self.btn_export.clicked.connect(self.show_export_dialog)
         self.btn_check_sel = QtWidgets.QPushButton("🔍 Check Selected"); self.btn_check_sel.clicked.connect(self.check_selected)
         # Duplicate detection button
-        self.btn_duplicates = QtWidgets.QPushButton("🔍 Find Duplicates v8.6"); self.btn_duplicates.clicked.connect(self.show_duplicate_report)
+        self.btn_duplicates = QtWidgets.QPushButton("🔍 Find Duplicates v8.7"); self.btn_duplicates.clicked.connect(self.show_duplicate_report)
         self.btn_duplicates.setStyleSheet("QPushButton { background-color: #f39c12; color: white; font-weight: bold; padding: 6px; border-radius: 4px; }")
-        self.btn_duplicates.setToolTip("v8.6 Enhanced: Detect duplicate cameras across all sources with advanced algorithms")
+        self.btn_duplicates.setToolTip("v8.7 Enhanced: Detect duplicate cameras across all sources with advanced algorithms")
         
         # SADP Device Discovery Tool
         self.btn_sadp = QtWidgets.QPushButton("🔍 SADP Tool"); self.btn_sadp.clicked.connect(self.show_sadp_tool)
@@ -6837,13 +6845,13 @@ class CameraMonitor(QtWidgets.QMainWindow):
     def show_performance_dashboard(self):
         """Show enhanced performance monitoring dashboard v8.6+."""
         dlg = QtWidgets.QDialog(self)
-        dlg.setWindowTitle("📊 Performance Dashboard v8.6")
+        dlg.setWindowTitle("📊 Performance Dashboard v8.7")
         dlg.setGeometry(150, 150, 800, 600)
         
         layout = QtWidgets.QVBoxLayout(dlg)
         
         # Header
-        header = QtWidgets.QLabel("<h2>📊 System Performance Metrics v8.6</h2>")
+        header = QtWidgets.QLabel("<h2>📊 System Performance Metrics v8.7</h2>")
         header.setAlignment(QtCore.Qt.AlignCenter)
         layout.addWidget(header)
         
@@ -8791,7 +8799,7 @@ class CameraMonitor(QtWidgets.QMainWindow):
     def show_workflow_wizard(self):
         """Automated workflow wizard following recommended steps."""
         dlg = QtWidgets.QDialog(self)
-        dlg.setWindowTitle(f"🚀 Quick Workflow v8.6 - Automated Camera Discovery")
+        dlg.setWindowTitle(f"🚀 Quick Workflow v8.7 - Automated Camera Discovery")
         dlg.setGeometry(100, 100, 600, 500)
         
         # Set logo icon
@@ -8809,7 +8817,7 @@ class CameraMonitor(QtWidgets.QMainWindow):
             logo_label.setPixmap(pixmap)
             header_layout.addWidget(logo_label)
         
-        header_text = QtWidgets.QLabel(f"🚀 Quick Sync v8.6 - {APP_COMPANY} Advanced Camera Discovery")
+        header_text = QtWidgets.QLabel(f"🚀 Quick Sync v8.7 - {APP_COMPANY} Advanced Camera Discovery")
         header_text.setStyleSheet("font-weight: bold; font-size: 14pt; color: #2c3e50;")
         header_layout.addWidget(header_text)
         layout.addLayout(header_layout)
@@ -8823,7 +8831,7 @@ class CameraMonitor(QtWidgets.QMainWindow):
         instructions = QtWidgets.QTextEdit()
         instructions.setReadOnly(True)
         instructions.setHtml(f"""
-        <b>🎆 Enhanced Quick Sync v8.6 Workflow:</b><br><br>
+        <b>🎆 Enhanced Quick Sync v8.7 Workflow:</b><br><br>
         <span style="color: #27ae60;"><b>✓ Step 1:</b> NVR Authentication & Validation</span><br>
         • Verify NVR connectivity with enhanced error handling<br>
         • Test credentials and establish secure connection<br>
@@ -8856,7 +8864,7 @@ class CameraMonitor(QtWidgets.QMainWindow):
         progress_widget = QtWidgets.QWidget()
         progress_layout = QtWidgets.QVBoxLayout(progress_widget)
         
-        progress_label = QtWidgets.QLabel("🚀 Ready to start Quick Sync v8.6 workflow...")
+        progress_label = QtWidgets.QLabel("🚀 Ready to start Quick Sync v8.7 workflow...")
         progress_label.setStyleSheet("font-weight: bold; color: #34495e; padding: 10px; background-color: #ecf0f1; border-radius: 5px;")
         
         progress_bar = QtWidgets.QProgressBar()
@@ -8995,7 +9003,7 @@ class CameraMonitor(QtWidgets.QMainWindow):
             log("[WORKFLOW] User requested skip current NVR")
         
         def run_workflow():
-            """Execute the enhanced Quick Sync v8.6 workflow."""
+            """Execute the enhanced Quick Sync v8.7 workflow."""
             processing_state['is_processing'] = True
             processing_state['should_stop'] = False
             processing_state['should_skip_current'] = False
@@ -9172,7 +9180,7 @@ class CameraMonitor(QtWidgets.QMainWindow):
 <b>Company:</b> {APP_COMPANY}<br>
 <b>Application ID:</b> {APP_ID}</p>
 
-<h3>✨ Enhanced Features v8.6.1</h3>
+<h3>✨ Enhanced Features v8.7</h3>
 <ul>
 """
         
