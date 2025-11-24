@@ -92,3 +92,7 @@ creds_*.json
 
 # Test files
 test_*.json
+
+# Admin-only local tools (do not commit)
+license_generator.py
+master_key_generator.py

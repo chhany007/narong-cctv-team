@@ -2,9 +2,9 @@
   "version": "8.7",
   "download_url": "https://github.com/chhany007/narong-cctv-team/releases/download/v8.7/NARONG_CCTV_v8.7_Portable.zip",
   "installer_url": "https://github.com/chhany007/narong-cctv-team/releases/download/v8.7/NARONG_CCTV_v8.7.exe",
-  "release_notes": "Version 8.7 Release Notes:\n\n✅ Enhanced Features:\n• Fixed update system crashes (QThread lifetime issue)\n• Improved taskbar icon display with multi-size support\n• Enhanced license activation system\n• Portable updater now replaces files from ZIP archives\n• Updated UI strings and branding to v8.7\n\n🔧 Technical Improvements:\n• Better error handling in update process\n• Improved connection caching\n• Enhanced performance monitoring\n• License generator creates activation keys compatible with app\n\n📋 Bug Fixes:\n• License validation signature matching\n• Update dialog thread safety\n• File replacement in portable mode",
-  "release_date": "2025-11-23",
-  "file_size": 113180145,
+  "release_notes": "Version 8.7 - Stable Release\n\n✅ Core Features:\n• Complete standalone EXE with all dependencies embedded\n• Enhanced license activation system with machine-bound keys\n• Automatic update system with portable ZIP support\n• Multi-size taskbar icon for better Windows integration\n• Advanced camera monitoring with NVR management\n• Excel import/export with comprehensive reporting\n• SADP device discovery tool\n• Performance monitoring dashboard\n\n🔧 Technical Improvements:\n• Fixed QThread lifetime issues in update system\n• Improved pandas/pyarrow integration\n• Enhanced error handling throughout\n• Optimized parallel camera checking\n• Better connection caching and retry logic\n• Secure credential storage with keyring\n\n📋 Bug Fixes:\n• License validation signature matching\n• Update dialog thread safety\n• File replacement in portable mode\n• Import errors in standalone EXE\n\n🎯 System Requirements:\n• Windows 10/11 (64-bit)\n• No Python installation required\n• ~115MB disk space",
+  "release_date": "2025-11-24",
+  "file_size": 113789560,
   "checksum": "",
   "required": false,
   "portable": true
